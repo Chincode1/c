@@ -1162,150 +1162,7 @@ render();
 })();
 </script>
 
-  <!-- จัดเมนู 3 ขีดใหม่: จัดหมวด + พับ/ขยายได้ -->
-<style>
-.dsc details{margin-top:6px}
-.dsc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:11px 10px;font-size:14px;font-weight:600;color:var(--mntx,var(--tx));cursor:pointer;border-radius:12px;user-select:none}
-.dsc summary::-webkit-details-marker{display:none}
-.dsc summary:active{background:color-mix(in srgb,var(--ac) 8%,transparent)}
-.dsc summary .gi{display:flex;color:var(--ac)}
-.dsc summary .gb{background:var(--er);color:#fff;font-size:11px;font-weight:600;padding:0 7px;border-radius:99px;line-height:18px}
-.dsc summary::after{content:"";margin-left:auto;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s;opacity:.5}
-.dsc details[open]>summary::after{transform:rotate(-135deg)}
-.dsc details>.gl{margin:0 0 4px 21px;padding-left:8px;border-left:2px solid color-mix(in srgb,var(--tx) 12%,transparent)}
-.dsc .gl .di{padding:10px;font-size:14.5px}
-</style>
-<script>
-(()=>{
-const _N=NAV;
-/* กำหนดหมวดและลำดับ: [ชื่อหมวด, ไอคอน, [รหัสรายการ...]] */
-const LAY=()=>MAIN?(isAdm()?[
-["จัดการเว็บเช่า","shop",["a_rent","a_plan","a_shops"]],
-["การเงิน","card",["a_pay"]],
-["หน้าตาเว็บ","pal",["a_brand","a_look","a_anim","a_cust"]],
-["ข้อมูลและประกาศ","info",["a_info"]],
-["บัญชี","user",["acct"]]
-]:[
-["เช่าเว็บร้านค้า","tag",["plans","mine"]],
-["บัญชี","user",["acct"]]
-]):(isAdm()?[
-["ภาพรวม","chart",["a_dash"]],
-["สินค้า","box",["a_prod","shop"]],
-["การเงิน","bolt",["a_top","a_keys","a_gift","a_pay"]],
-["หน้าตาร้าน","pal",["a_brand","a_look","a_card","a_anim","a_cust"]],
-["ข้อมูลร้าน","info",["a_info"]],
-["บัญชี","user",["acct"]]
-]:[
-["ร้านค้า","shop",["shop","info"]],
-["เติมเงิน / ประวัติ","bolt",["top","his"]],
-["บัญชี","user",["acct"]]
-]);
-NAV=function(){
-const m={};_N().forEach(([g,L])=>L.forEach(i=>m[i[0]]=i));
-const used=new Set(),out=[];
-LAY().forEach(([t,ic,ks])=>{const L=ks.filter(k=>m[k]);L.forEach(k=>used.add(k));if(L.length)out.push([t,L.map(k=>m[k]),ic])});
-const rest=Object.keys(m).filter(k=>!used.has(k));
-if(rest.length)out.push(["อื่นๆ",rest.map(k=>m[k]),"info"]);
-return out;
-};
-window.__mg=window.__mg||{};
-menuOpen=function(){
-const G=NAV();
-$("#mo").innerHTML=`<div class="ov dr" onclick="if(event.target==this)closeM()"><div class="dw"><div class="dh">${site.logo?`<img src="${esc(site.logo)}">`:""}<b>${esc(nm())}</b><button class="ib" onclick="closeM()">${ico("close")}</button></div>${me?`<div class="dme">${isAdm()?"ผู้ดูแล":esc(me.u)}${!isAdm()&&!MAIN?` · <span class="bal">${wal.credits||0} บาท</span>`:""}</div>`:""}<div class="dsc">${G.map(([g,L,ic],gi)=>{
-const has=L.some(x=>x[0]==tab),op=window.__mg[gi]!==undefined?window.__mg[gi]:true,bd=L.reduce((s,x)=>s+(+x[3]||0),0);
-return `<details ${op||has?"open":""} ontoggle="__mg[${gi}]=this.open"><summary><span class="gi">${ico(ic||"info")}</span>${g}${bd?`<span class="gb">${bd}</span>`:""}</summary><div class="gl">${L.map(([k,l,i2,b])=>`<button class="di ${tab==k?"on":""}" onclick="goT('${k}')"><span class="dic">${ico(i2)}</span><span>${l}</span>${b?`<span class="er ml">${b}</span>`:""}</button>`).join("")}</div></details>`}).join("")}</div><div class="dq"><button class="di" onclick="toggleTheme()"><span class="dic">${ico("moon")}</span><span>สลับโหมดมืด / สว่าง</span></button>${me?`<button class="di" onclick="logout()"><span class="dic">${ico("out")}</span><span>ออกจากระบบ</span></button>`:`<button class="di" onclick="authUI(0)"><span class="dic">${ico("login")}</span><span>เข้าสู่ระบบ / สมัครสมาชิก</span></button>`}</div></div></div>`;
-};
-render();
-})();
-</script>
-
-  <!-- ปรับขนาดปุ่มแชทลอย -->
-<style>
-#cb{width:var(--cbs,58px);height:var(--cbs,58px)}
-#cb svg{width:calc(var(--cbs,58px)*.45);height:calc(var(--cbs,58px)*.45)}
-</style>
-<script>
-(()=>{
-const apply=()=>{const n=+site.cbSize,r=document.documentElement.style;n>=40&&n<=120?r.setProperty("--cbs",n+"px"):r.removeProperty("--cbs")};
-window.cuCbReset=async()=>{try{await D("settings/site").update({cbSize:firebase.firestore.FieldValue.delete()});await load();render();say("รีเซ็ตขนาดปุ่มแชทแล้ว",1)}catch(e){say(ERR(e))}};
-const _r=render;render=function(){
-_r();apply();
-if(tab=="a_cust"&&isAdm()){
-const v=+site.cbSize||58;
-$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>ขนาดปุ่มแชทลอย</h3><div class="mu" style="margin-bottom:8px">ปรับได้ 40 - 120 px (ค่าเริ่มต้น 58)</div><label class="mu">ขนาด: <b id="cbv">${v}</b> px</label><input type="range" min="40" max="120" step="2" value="${v}" oninput="document.getElementById('cbv').textContent=this.value;document.documentElement.style.setProperty('--cbs',this.value+'px')" onchange="cuSet('cbSize',+this.value)"><button class="b s f" onclick="cuCbReset()">รีเซ็ตกลับ 58px</button></div>`);
-}
-};
-render();
-})();
-</script>
-
-  <!-- ย้ายช่องตั้งค่า TrueMoney ไปไว้หน้าบัญชีรับโอน (ร่วมกับธนาคาร) -->
-<script>
-(()=>{
-if(MAIN)return;
-const _r=render;render=function(){
-_r();
-if(!isAdm())return;
-/* เอาการ์ดเดิมออกจากหน้าปรับแต่งทั้งหมด */
-if(tab=="a_cust"){
-document.querySelectorAll("#app .c.cu").forEach(e=>{const h=e.querySelector("h3");if(h&&h.textContent.startsWith("รับเงินผ่าน TrueMoney"))e.remove()});
-}
-/* ใส่การ์ดใหม่ในหน้าบัญชีรับโอน */
-if(tab=="a_pay"){
-$("#app").insertAdjacentHTML("beforeend",`<div class="c cu" style="margin-top:14px"><h3>รับเงินผ่าน TrueMoney</h3><div class="mu" style="margin-bottom:8px">ใส่เบอร์/ชื่อ TrueMoney Wallet และ QR ลูกค้าจะแจ้งโอนพร้อมสลิป หรือแนบลิงก์ซองอั่งเปา แล้วคุณกดอนุมัติในเมนู "รายการโอน" ว่างทั้งสองช่อง = ปิด (ช่องนี้บันทึกอัตโนมัติ ไม่ต้องกดปุ่มบันทึกด้านบน)</div><textarea placeholder="เช่น TrueMoney 0812345678 ชื่อ สมชาย / โอนหรือส่งซองอั่งเปาเข้าเบอร์นี้" onchange="cuSet('twPay',this.value.trim())">${esc(site.twPay||"")}</textarea>${site.twQr?`<img class="pv" src="${esc(site.twQr)}">`:'<div class="mu">ยังไม่มีรูป QR</div>'}<input type="file" accept="image/*" onchange="cuUp('twQr',500,this)">${site.twQr?`<button class="b d sm" onclick="cuDel('twQr')">ลบรูป QR</button>`:""}</div>`);
-}
-};
-render();
-})();
-</script>
-
-  <!-- รวมการ์ดในหน้า "ปรับแต่งทั้งหมด" เป็นหมวด -->
-<style>
-.cg{margin-bottom:12px;border:1px solid var(--bd);border-radius:16px;overflow:hidden}
-.cg>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:15px 16px;font-weight:600;font-size:16px;cursor:pointer;user-select:none}
-.cg>summary::-webkit-details-marker{display:none}
-.cg>summary .gi{display:flex;color:var(--ac)}
-.cg>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s;opacity:.5}
-.cg[open]>summary::after{transform:rotate(-135deg)}
-.cg>.cgb{padding:0 12px 4px}
-.cg .c{border-radius:12px}
-</style>
-<script>
-(()=>{
-const GR=[
-["แชท","chat",["ปุ่มแชทลอย (วงกลม)","ขนาดปุ่มแชทลอย"]],
-["เมนู","menu",["เมนูลัดด้านล่าง","สีแถบเมนู"]],
-["การแจ้งเตือน","bolt",["สีการแจ้งเตือน","ขนาดการแจ้งเตือน"]],
-["ประกาศ / โฆษณา","info",["ข้อความ + รูปประกาศ","วิดีโอป้ายประกาศหน้าหลัก","โฆษณา"]],
-["พื้นหลัง","pal",["วิดีโอพื้นหลัง"]],
-["สินค้า / สมาชิก","box",["หมวดหมู่สินค้า","เครดิตต้อนรับสมาชิกใหม่"]]
-];
-window.__cg=window.__cg||{};
-const _r=render;render=function(){
-_r();
-if(tab!="a_cust"||!isAdm())return;
-const cards=[...document.querySelectorAll("#app > .c")];
-const used=new Set();
-const anchor=cards[0];
-const wrap=document.createElement("div");
-GR.forEach(([t,ic,names],gi)=>{
-const mine=cards.filter(c=>{const h=c.querySelector("h3");return h&&names.some(n=>h.textContent.startsWith(n))});
-if(!mine.length)return;
-mine.forEach(c=>used.add(c));
-const d=document.createElement("details");d.className="cg";
-if(window.__cg[gi])d.open=true;
-d.ontoggle=()=>{window.__cg[gi]=d.open};
-d.innerHTML=`<summary><span class="gi">${ico(ic)}</span>${t}</summary><div class="cgb"></div>`;
-const b=d.querySelector(".cgb");mine.forEach(c=>b.appendChild(c));
-wrap.appendChild(d);
-});
-if(anchor)anchor.before(wrap);else $("#app").appendChild(wrap);
-};
-render();
-})();
-</script>
-
-  <!-- ===== จัดเมนูแอดมินใหม่ทั้งหมด (บล็อกเดียว แทน 5 บล็อกก่อนหน้า) ===== -->
+  <!-- ===== เมนูแอดมินทั้งหมด (บล็อกเดียว มีตัวกันหน้าว่าง) ===== -->
 <style>
 .dsc details{margin-top:6px}
 .dsc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:11px 10px;font-size:14px;font-weight:600;color:var(--mntx,var(--tx));cursor:pointer;border-radius:12px;user-select:none}
@@ -1323,29 +1180,29 @@ render();
 (()=>{
 let inC=false;
 
-/* ---------- 1) โครงเมนู: หมวด > หน้า ---------- */
+/* ---------- 1) โครงเมนูแอดมิน: หมวด > หน้า ---------- */
 const _N=NAV;
 NAV=function(){
 const G=_N();
 if(!isAdm())return G;
 const m={};G.forEach(([g,L])=>L.forEach(i=>m[i[0]]=i));
 const I=(k,l,ic)=>[k,l,ic,m[k]?m[k][3]:""];
+const menu=()=>["เมนูและปุ่ม","menu",[I("c_menu","เมนูลัดล่าง / สีแถบเมนู","menu"),I("c_chat","ปุ่มแชทลอย (รูป + ขนาด)","chat")]];
+const ann=()=>["ประกาศและแจ้งเตือน","info",[I("a_info","ข้อความ / ติดต่อ / ป๊อปอัป","info"),I("c_ads","แถบประกาศ / รูป / วิดีโอ / โฆษณา","info"),I("c_notify","สีและขนาดแจ้งเตือน","bolt")]];
+const acc=()=>["บัญชี","user",[I("acct","บัญชี / โปรไฟล์ / รหัสผ่าน","user")]];
 const out=MAIN?[
 ["จัดการเว็บเช่า","shop",[I("a_rent","คำสั่งเช่า","doc"),I("a_plan","แพ็กเกจเช่า","tag"),I("a_shops","ร้านที่เช่า","shop")]],
 ["การเงิน","card",[I("a_pay","บัญชีรับโอนค่าเช่า (ธนาคาร + TrueMoney)","card")]],
 ["หน้าตาเว็บ","pal",[I("a_brand","ชื่อ / โลโก้ / แบนเนอร์","star"),I("a_look","สี / ฟอนต์","pal"),I("c_bg","วิดีโอพื้นหลัง","wand"),I("a_anim","แอนิเมชัน / ลูกเล่น","wand")]],
-["เมนูและปุ่ม","menu",[I("c_menu","เมนูลัดล่าง / สีแถบเมนู","menu"),I("c_chat","ปุ่มแชทลอย (รูป + ขนาด)","chat")]],
-["ประกาศและแจ้งเตือน","info",[I("a_info","ข้อความ / ติดต่อ / ป๊อปอัป","info"),I("c_ads","แถบประกาศ / รูป / วิดีโอ / โฆษณา","info"),I("c_notify","สีและขนาดแจ้งเตือน","bolt")]],
-["บัญชี","user",[I("acct","บัญชี / โปรไฟล์ / รหัสผ่าน","user")]]
+menu(),ann(),acc()
 ]:[
 ["ภาพรวม","chart",[I("a_dash","สรุปร้าน","chart")]],
 ["สินค้า","box",[I("a_prod","จัดการสินค้า / หมวดหมู่","box")]],
 ["การเงิน","bolt",[I("a_top","รายการโอน (อนุมัติสลิป)","bolt"),I("a_pay","บัญชีรับเงิน (ธนาคาร + TrueMoney)","card"),I("a_keys","คีย์เติมเงิน","key"),I("a_gift","แจกเครดิตให้ผู้เล่น","bolt"),I("c_welcome","เครดิตต้อนรับสมาชิกใหม่","star")]],
 ["หน้าตาร้าน","pal",[I("a_brand","ชื่อ / โลโก้ / แบนเนอร์","star"),I("a_look","สี / ฟอนต์","pal"),I("a_card","การ์ดสินค้า","card"),I("c_bg","วิดีโอพื้นหลัง","wand"),I("a_anim","แอนิเมชัน / ลูกเล่น","wand")]],
-["เมนูและปุ่ม","menu",[I("c_menu","เมนูลัดล่าง / สีแถบเมนู","menu"),I("c_chat","ปุ่มแชทลอย (รูป + ขนาด)","chat")]],
-["ประกาศและแจ้งเตือน","info",[I("a_info","ข้อความ / ติดต่อ / ป๊อปอัป","info"),I("c_ads","แถบประกาศ / รูป / วิดีโอ / โฆษณา","info"),I("c_notify","สีและขนาดแจ้งเตือน","bolt")]],
+menu(),ann(),
 ["หน้าร้าน","shop",[I("shop","ดูหน้าร้านลูกค้า","shop")]],
-["บัญชี","user",[I("acct","บัญชี / โปรไฟล์ / รหัสผ่าน","user")]]
+acc()
 ];
 if(inC)out.push(["","wand",[["a_cust","","wand"]]]);
 return out;
@@ -1360,15 +1217,15 @@ const has=L.some(x=>x[0]==tab),op=window.__mg[gi]!==undefined?window.__mg[gi]:ha
 return `<details ${op||has?"open":""} ontoggle="__mg[${gi}]=this.open"><summary><span class="gi">${ico(ic||"info")}</span>${g}${bd?`<span class="gb">${bd}</span>`:""}</summary><div class="gl">${L.map(([k,l,i2,b])=>`<button class="di ${tab==k?"on":""}" onclick="goT('${k}')"><span class="dic">${ico(i2)}</span><span>${l}</span>${b?`<span class="er ml">${b}</span>`:""}</button>`).join("")}</div></details>`}).join("")}</div><div class="dq"><button class="di" onclick="toggleTheme()"><span class="dic">${ico("moon")}</span><span>สลับโหมดมืด / สว่าง</span></button>${me?`<button class="di" onclick="logout()"><span class="dic">${ico("out")}</span><span>ออกจากระบบ</span></button>`:`<button class="di" onclick="authUI(0)"><span class="dic">${ico("login")}</span><span>เข้าสู่ระบบ / สมัครสมาชิก</span></button>`}</div></div></div>`;
 };
 
-/* ปุ่ม "ปรับแต่ง" ที่แถบล่าง ให้ไปหน้าแรกของหมวดหน้าตา */
+/* ปุ่ม "ปรับแต่ง" ที่แถบล่าง พาไปหน้า ชื่อ/โลโก้ */
 const _g=goT;
 goT=function(k){if(k=="a_cust"&&isAdm())k="a_brand";_g(k)};
 
-/* ---------- 3) การเงิน: ธนาคาร + TrueMoney อยู่ฟอร์มเดียว ปุ่มบันทึกเดียว ---------- */
+/* ---------- 3) ธนาคาร + TrueMoney อยู่ฟอร์มเดียว ปุ่มบันทึกเดียว ---------- */
 const _S=SCH;
 SCH=function(){
 const s=_S();
-s.pay.push(["a","twPay","TrueMoney: เบอร์ / ชื่อ (ว่างทั้งสองช่อง = ปิดการรับ TrueMoney)"],["f","twQr","รูป QR TrueMoney",500]);
+if(!s.pay.some(f=>f[1]=="twPay"))s.pay.push(["a","twPay","TrueMoney: เบอร์ / ชื่อ (ว่างทั้งสองช่อง = ปิดการรับ TrueMoney)"],["f","twQr","รูป QR TrueMoney",500]);
 return s;
 };
 /* เว็บหลัก: ตอนลูกค้ากดเช่า โชว์ช่องทาง TrueMoney ด้วย */
@@ -1377,8 +1234,8 @@ const _rent=rent;
 rent=function(id){
 _rent(id);
 const m=document.querySelector("#mo .md"),f=m&&m.querySelector("#rsl");
-if(f&&(site.twPay||site.twQr)){
-const x=document.createElement("div");x.className="c";x.style.marginTop="10px";
+if(f&&(site.twPay||site.twQr)&&!m.querySelector(".tmx")){
+const x=document.createElement("div");x.className="c tmx";x.style.marginTop="10px";
 x.innerHTML=`<h3>หรือโอนผ่าน TrueMoney</h3>${site.twQr?`<img src="${esc(site.twQr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:8px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.twPay||"")}</div>`;
 f.before(x);
 }
@@ -1398,25 +1255,47 @@ const sizeCard=()=>{const v=+site.cbSize||58;return `<div class="c"><h3>ขน�
 window.cuCbReset=async()=>{try{await D("settings/site").update({cbSize:firebase.firestore.FieldValue.delete()});await load();render();say("รีเซ็ตขนาดปุ่มแชทแล้ว",1)}catch(e){say(ERR(e))}};
 const applySize=()=>{const n=+site.cbSize,r=document.documentElement.style;n>=40&&n<=120?r.setProperty("--cbs",n+"px"):r.removeProperty("--cbs")};
 
+/* ---------- 5) ตัวกันหน้าว่าง ---------- */
+const blank=()=>{const a=$("#app");return !!a&&![...a.children].some(e=>e.tagName!="HEADER"&&!e.classList.contains("nb")&&e.id!="nbv")};
+const fail=e=>{
+console.error(e);
+const a=$("#app");if(!a)return;
+a.querySelectorAll(".erx").forEach(x=>x.remove());
+a.insertAdjacentHTML("beforeend",`<div class="c erx"><h3 class="er">หน้านี้โหลดไม่สำเร็จ</h3><div class="mu" style="word-break:break-all">${esc((e&&e.message)||String(e))}</div><button class="b f" onclick="tab='';render()">กลับหน้าแรก</button></div>`);
+};
+
+/* ---------- 6) วาดหน้า ---------- */
 const _r=render;
 render=function(){
+let bad=null;
+try{
 const t=tab,p=PG[t];
 if(isAdm()&&p&&!(t=="c_welcome"&&MAIN)){
-/* ให้ระบบเดิมสร้างการ์ดทั้งหมดก่อน แล้วเลือกมาเฉพาะของหน้านี้ */
+/* ให้ระบบเดิมสร้างการ์ดทั้งหมดก่อน แล้วเลือกมาเฉพาะของหน้านี้ (หาได้ทุกชั้น แม้อยู่ใน details) */
 inC=true;tab="a_cust";
 try{_r()}finally{tab=t;inC=false}
-const app=$("#app"),keep=[...app.querySelectorAll(":scope > .c")].filter(c=>{const h=c.querySelector("h3");return h&&p.k.some(n=>h.textContent.startsWith(n))});
+const app=$("#app");
+const hit=[...app.querySelectorAll(".c")].filter(c=>{const h=c.querySelector(":scope > h3");return h&&p.k.some(n=>h.textContent.trim().startsWith(n))});
+const keep=hit.filter(c=>!hit.some(o=>o!==c&&o.contains(c)));
 [...app.children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb"))e.remove()});
 app.insertAdjacentHTML("beforeend",`<h3 class="ph">${p.t}</h3>`);
-keep.forEach(c=>app.appendChild(c));
+keep.forEach(c=>{c.classList.add("in");app.appendChild(c)});
 if(t=="c_chat")app.insertAdjacentHTML("beforeend",sizeCard());
 if(!keep.length&&t!="c_chat")app.insertAdjacentHTML("beforeend",'<div class="c mu">ไม่มีการตั้งค่าในหน้านี้</div>');
-}else _r();
-applySize();
+}else{
+_r();
+}
+/* เอาการ์ด TrueMoney แยกของบล็อกเก่าออก (ตอนนี้อยู่ในฟอร์มธนาคารแล้ว) */
+document.querySelectorAll("#app .c.cu").forEach(e=>{const h=e.querySelector(":scope > h3");if(h&&h.textContent.startsWith("รับเงินผ่าน TrueMoney"))e.remove()});
+}catch(e){inC=false;bad=e}
+if(bad)fail(bad);
+else if(blank()&&!window.__rb){window.__rb=1;tab="";try{render()}finally{window.__rb=0}}
+try{applySize()}catch(e){}
 };
 render();
 })();
 </script>
+
 
   
 
