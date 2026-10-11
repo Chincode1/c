@@ -1022,7 +1022,26 @@ render();
 })();
 </script>
 
-  
+  <!-- วางต่อท้ายสุด (หลัง addon7) ก่อน </body> : แจ้งเตือนเครดิตต้อนรับสมาชิกใหม่ (หน้าจอแบบเงินเข้า) -->
+<script>
+(()=>{
+const _td=topDone;
+topDone=function(a,title){_td(a);if(title){const h=$("#tpo h2");if(h)h.textContent=title}};
+const _da=window.doAuth;
+window.doAuth=async function(up){
+const u=($("#au")?.value||"").trim();
+await _da(up);
+const w=+site.welcome||0;
+if(up&&!MAIN&&w>0&&me&&!isAdm()&&me.u===u){lastTp=0;topDone(w,site.welcomeMsg||"ยินดีต้อนรับสมาชิกใหม่")}
+};
+const _r=render;render=function(){
+_r();
+if(tab=="a_cust"&&isAdm()&&!MAIN)$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>เครดิตต้อนรับสมาชิกใหม่</h3><div class="mu" style="margin-bottom:8px">สมัครเสร็จแล้วลูกค้าจะเห็นหน้าจอเขียวแบบเงินเข้าทันที (ใส่ 0 = ไม่แจกและไม่แจ้งเตือน)</div><label class="mu">จำนวนเครดิต (บาท)</label><input type="number" min="0" value="${+site.welcome||0}" onchange="cuSet('welcome',+this.value||0)"><label class="mu">หัวข้อที่แสดง</label><input value="${esc(site.welcomeMsg||"")}" placeholder="ยินดีต้อนรับสมาชิกใหม่" onchange="cuSet('welcomeMsg',this.value.trim())"><button class="b s f" onclick="lastTp=0;topDone(+site.welcome||50,site.welcomeMsg||'ยินดีต้อนรับสมาชิกใหม่')">ดูตัวอย่าง</button></div>`);
+};
+render();
+})();
+</script>
+
   
   
 
