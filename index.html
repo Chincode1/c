@@ -752,6 +752,97 @@ const _lw=logout;logout=function(){chatClose();_lw()};
 })();
 </script>
 
+  <!-- วางไฟล์นี้ต่อจาก addon.html (ก่อน </body>) -->
+<script>
+(()=>{
+const st=document.createElement("style");st.textContent=`
+#bn{align-items:flex-end}
+#bn .ctr{margin-top:-26px;color:var(--tx)}
+#bn .cc{width:60px;height:60px;border-radius:50%;background:var(--bnc,var(--ac));color:var(--bt,var(--ac2));display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.35);border:4px solid var(--bg)}
+#bn .cc svg{width:28px;height:28px}
+#bgv2{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1}
+body.nbn .w{padding-bottom:40px}body.nbn #cb{bottom:20px}
+.cu img.pv{width:100%;max-height:140px;object-fit:contain;display:block;margin:6px 0}`;
+document.head.appendChild(st);
+
+const busy2=on=>{if(on){if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}}else $("#ld")?.remove()};
+const FV=()=>firebase.firestore.FieldValue;
+const S=o=>D("settings/site").set(o,{merge:true});
+const done=async m=>{await load();render();say(m||"บันทึกแล้ว",1)};
+const run=async(f,m)=>{busy2(1);try{await f();await done(m)}catch(e){say(ERR(e))}finally{busy2(0)}};
+
+/* ---------- เมนูลัดล่าง: เติมเงินอยู่กลาง สีเข้ม ---------- */
+function bar2(){
+if(site.bnOn===false){$("#bn")?.remove();document.body.classList.add("nbn");return}
+document.body.classList.remove("nbn");
+const c=hx(site.bnc,hx(site.ac,"#0f766e")),r=document.documentElement.style;
+r.setProperty("--bnc",c);r.setProperty("--bt",lum(c)>.45?"#111":"#fff");
+let b=$("#bn");if(!b){b=document.createElement("nav");b.id="bn";document.body.appendChild(b)}
+const a=isAdm();
+const L=MAIN?(a?[["a_shops","ร้าน","shop"],["a_rent","คำสั่งเช่า","doc",1],["a_cust","ปรับแต่ง","wand"]]:[["mine","การเช่า","doc"],["plans","แพ็กเกจ","tag",1],["chat","แชท","chat"]])
+:(a?[["a_dash","สรุป","chart"],["a_prod","สินค้า","box",1],["a_cust","ปรับแต่ง","wand"]]:[["shop","สินค้า","shop"],["top","เติมเงิน","bolt",1],["his","ประวัติ","doc"]]);
+const btn=([k,l,i,m])=>`<button class="${tab==k?"on":""} ${m?"ctr":""}" onclick="${k=="chat"?"cGo()":`goT('${k}')`}">${m?`<span class="cc">${ico(i)}</span>`:ico(i)}<span>${l}</span></button>`;
+b.innerHTML=`<button onclick="menuOpen()">${ico("menu")}<span>เมนู</span></button>`+L.map(btn).join("")+`<button class="${tab=="acct"?"on":""}" onclick="goT('acct')">${me&&me.av?`<img src="${esc(me.av)}">`:ico("user")}<span>บัญชี</span></button>`;
+}
+window.cGo=()=>{if(!me){authUI(0);return say("เข้าสู่ระบบก่อนแชท")}isAdm()?chatList():chatOpen(me.u)};
+
+/* ---------- วิดีโอพื้นหลังที่อัปโหลดเอง (แบ่งเก็บเป็นชิ้นใน Firestore) ---------- */
+async function vid(){
+if(!site.bgvN){$("#bgv2")?.remove();return}
+document.body.classList.add("hv");
+if(window.__vk===site.bgvAt&&$("#bgv2"))return;window.__vk=site.bgvAt;
+try{
+let s="";for(let i=0;i<site.bgvN;i++)s+=(await D("media/bgv_"+i).get()).data().d;
+const bl=await(await fetch(s)).blob();$("#bgv2")?.remove();
+const v=document.createElement("video");v.id="bgv2";v.src=URL.createObjectURL(bl);v.autoplay=v.loop=v.muted=v.playsInline=true;
+document.body.prepend(v);v.play().catch(()=>{});
+}catch(e){window.__vk=null}
+}
+window.cuVid=async el=>{
+const f=el.files[0];if(!f)return;
+if(f.size>2.6e6)return say("วิดีโอใหญ่เกิน 2.5MB ตัดให้สั้น/บีบอัดก่อน หรือใช้ช่องลิงก์แทน");
+run(async()=>{
+const u=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)});
+const n=Math.ceil(u.length/7e5);
+for(let i=0;i<n;i++)await D("media/bgv_"+i).set({d:u.slice(i*7e5,(i+1)*7e5)});
+for(let i=n;i<(site.bgvN||0);i++)await D("media/bgv_"+i).delete();
+await S({bgvN:n,bgvAt:Date.now()});window.__vk=null;
+},"อัปโหลดวิดีโอแล้ว");
+};
+window.cuVidDel=()=>run(async()=>{await D("settings/site").update({bgvN:FV().delete(),bgvAt:FV().delete(),bgv:FV().delete()});$("#bgv2")?.remove();window.__vk=null},"ลบวิดีโอแล้ว");
+
+/* ---------- หน้า "ปรับแต่งทั้งหมด" (แอดมิน) ---------- */
+window.cuSet=(k,v)=>run(()=>S({[k]:v}));
+window.cuUp=async(k,max,el)=>{const f=el.files[0];if(!f)return;run(async()=>S({[k]:await pic(f,max,$("#rm_"+k)?.checked)}),"อัปโหลดรูปแล้ว")};
+window.cuDel=k=>run(()=>D("settings/site").update({[k]:FV().delete()}),"ลบแล้ว");
+const blk=(t,d,b)=>`<div class="c cu"><h3>${t}</h3><div class="mu" style="margin-bottom:8px">${d}</div>${b}</div>`;
+const img=(k,max,rm)=>(site[k]?`<img class="pv" src="${esc(site[k])}">`:'<div class="mu">ยังไม่มีรูป</div>')+(rm?`<label class="cl">ลบพื้นหลังรูปอัตโนมัติ<input type="checkbox" id="rm_${k}" checked></label>`:"")+`<input type="file" accept="image/*" onchange="cuUp('${k}',${max},this)">`+(site[k]?`<button class="b d sm" onclick="cuDel('${k}')">ลบรูปนี้</button>`:"");
+function custUI(){
+const ci=site.catImg||{},wide=site.catShape=="wide";
+return blk("เมนูลัดด้านล่าง","ปุ่มกลางเป็นปุ่มหลัก (เติมเงิน / สินค้า / แพ็กเกจ)",`<label class="cl">แสดงเมนูลัด<input type="checkbox" ${site.bnOn===false?"":"checked"} onchange="cuSet('bnOn',this.checked)"></label><label class="mu">สีปุ่มกลาง</label><input type="color" value="${hx(site.bnc,hx(site.ac,"#0f766e"))}" onchange="cuSet('bnc',this.value)">`)
++blk("วิดีโอพื้นหลัง (เล่นวนซ้ำ)","อัปโหลดไฟล์ได้ไม่เกิน 2.5MB หรือวางลิงก์ .mp4",`<div class="mu">${site.bgvN?"มีวิดีโอที่อัปโหลดอยู่แล้ว":site.bgv?"ใช้ลิงก์อยู่":"ยังไม่มีวิดีโอ"}</div><input type="file" accept="video/*" onchange="cuVid(this)"><input placeholder="หรือลิงก์ https://....mp4" value="${esc(site.bgv||"")}" onchange="cuSet('bgv',this.value.trim())">${site.bgvN||site.bgv?`<button class="b d sm" onclick="cuVidDel()">ลบวิดีโอ</button>`:""}`)
++blk("ข้อความ + รูปประกาศ","ข้อความวิ่งด้านบน และรูปเต็มความกว้างใต้หัวเว็บ",`<input placeholder="ข้อความประกาศวิ่ง" value="${esc(site.notice||"")}" onchange="cuSet('notice',this.value.trim())">${img("noticeImg",900)}`)
++blk("โฆษณา (ป๊อปอัปตอนเข้าเว็บ)","รูปจะแสดงเต็ม 100% ของกล่อง",`<textarea placeholder="ข้อความโฆษณา (ไม่ใส่ก็ได้)" onchange="cuSet('pop',this.value.trim())">${esc(site.pop||"")}</textarea>${img("popImg",900)}`)
++blk("ปุ่มแชทลอย (วงกลม)","รูปจะถูกตัดเป็นวงกลม",img("chatImg",200,1))
++(MAIN?"":blk("หมวดหมู่สินค้า","เลือกรูปแบบและใส่รูปให้แต่ละหมวด (หมวดมาจากช่องหมวดหมู่ตอนเพิ่มสินค้า)",`<select onchange="catShape(this.value)"><option value="round" ${wide?"":"selected"}>รูปวงกลม</option><option value="wide" ${wide?"selected":""}>รูปแนวนอน</option></select>${cats().map(c=>`<div class="rw"><span style="display:flex;align-items:center;gap:8px">${ci[c]?`<img src="${esc(ci[c])}" style="width:44px;height:44px;border-radius:${wide?"8px":"50%"};object-fit:cover">`:""}<b>${esc(c)}</b></span><input type="file" accept="image/*" data-c="${esc(c)}" onchange="catPic(this)" style="width:auto;max-width:170px"></div>`).join("")||'<span class="mu">ยังไม่มีหมวด ไปเพิ่มสินค้าแล้วใส่หมวดหมู่ก่อน</span>'}`))
++`<div class="mu" style="text-align:center">ตั้งค่าสี / ฟอนต์ / การ์ด / แอนิเมชัน อยู่ในเมนู "หน้าตาเว็บ" เหมือนเดิม</div>`;
+}
+const _NAV=NAV;NAV=function(){const G=_NAV();if(isAdm())G.splice(1,0,["ปรับแต่งเว็บ",[["a_cust","ปรับแต่งทั้งหมด (วิดีโอ/รูป/แชท/หมวด)","wand"]]]);return G};
+const _r=render;render=function(){
+_r();
+if(tab=="a_cust"&&isAdm()){[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb"))e.remove()});$("#app").insertAdjacentHTML("beforeend",`<h3 class="ph">ปรับแต่งทั้งหมด</h3>`+custUI())}
+bar2();vid();
+};
+render();
+})();
+</script>
+
+  <style>
+#cb:not([data-k=""]){background:transparent;box-shadow:none;overflow:visible}
+#cb:not([data-k=""]) img{object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+</style>
+
+  
 
 
 </body></html>
