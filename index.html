@@ -1305,6 +1305,119 @@ render();
 })();
 </script>
 
+  <!-- ===== จัดเมนูแอดมินใหม่ทั้งหมด (บล็อกเดียว แทน 5 บล็อกก่อนหน้า) ===== -->
+<style>
+.dsc details{margin-top:6px}
+.dsc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:11px 10px;font-size:14px;font-weight:600;color:var(--mntx,var(--tx));cursor:pointer;border-radius:12px;user-select:none}
+.dsc summary::-webkit-details-marker{display:none}
+.dsc summary .gi{display:flex;color:var(--ac)}
+.dsc summary .gb{background:var(--er);color:#fff;font-size:11px;font-weight:600;padding:0 7px;border-radius:99px;line-height:18px}
+.dsc summary::after{content:"";margin-left:auto;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s;opacity:.5}
+.dsc details[open]>summary::after{transform:rotate(-135deg)}
+.dsc details>.gl{margin:0 0 4px 21px;padding-left:8px;border-left:2px solid color-mix(in srgb,var(--tx) 12%,transparent)}
+.dsc .gl .di{padding:10px;font-size:14.5px}
+#cb{width:var(--cbs,58px);height:var(--cbs,58px)}
+#cb svg{width:calc(var(--cbs,58px)*.45);height:calc(var(--cbs,58px)*.45)}
+</style>
+<script>
+(()=>{
+let inC=false;
+
+/* ---------- 1) โครงเมนู: หมวด > หน้า ---------- */
+const _N=NAV;
+NAV=function(){
+const G=_N();
+if(!isAdm())return G;
+const m={};G.forEach(([g,L])=>L.forEach(i=>m[i[0]]=i));
+const I=(k,l,ic)=>[k,l,ic,m[k]?m[k][3]:""];
+const out=MAIN?[
+["จัดการเว็บเช่า","shop",[I("a_rent","คำสั่งเช่า","doc"),I("a_plan","แพ็กเกจเช่า","tag"),I("a_shops","ร้านที่เช่า","shop")]],
+["การเงิน","card",[I("a_pay","บัญชีรับโอนค่าเช่า (ธนาคาร + TrueMoney)","card")]],
+["หน้าตาเว็บ","pal",[I("a_brand","ชื่อ / โลโก้ / แบนเนอร์","star"),I("a_look","สี / ฟอนต์","pal"),I("c_bg","วิดีโอพื้นหลัง","wand"),I("a_anim","แอนิเมชัน / ลูกเล่น","wand")]],
+["เมนูและปุ่ม","menu",[I("c_menu","เมนูลัดล่าง / สีแถบเมนู","menu"),I("c_chat","ปุ่มแชทลอย (รูป + ขนาด)","chat")]],
+["ประกาศและแจ้งเตือน","info",[I("a_info","ข้อความ / ติดต่อ / ป๊อปอัป","info"),I("c_ads","แถบประกาศ / รูป / วิดีโอ / โฆษณา","info"),I("c_notify","สีและขนาดแจ้งเตือน","bolt")]],
+["บัญชี","user",[I("acct","บัญชี / โปรไฟล์ / รหัสผ่าน","user")]]
+]:[
+["ภาพรวม","chart",[I("a_dash","สรุปร้าน","chart")]],
+["สินค้า","box",[I("a_prod","จัดการสินค้า / หมวดหมู่","box")]],
+["การเงิน","bolt",[I("a_top","รายการโอน (อนุมัติสลิป)","bolt"),I("a_pay","บัญชีรับเงิน (ธนาคาร + TrueMoney)","card"),I("a_keys","คีย์เติมเงิน","key"),I("a_gift","แจกเครดิตให้ผู้เล่น","bolt"),I("c_welcome","เครดิตต้อนรับสมาชิกใหม่","star")]],
+["หน้าตาร้าน","pal",[I("a_brand","ชื่อ / โลโก้ / แบนเนอร์","star"),I("a_look","สี / ฟอนต์","pal"),I("a_card","การ์ดสินค้า","card"),I("c_bg","วิดีโอพื้นหลัง","wand"),I("a_anim","แอนิเมชัน / ลูกเล่น","wand")]],
+["เมนูและปุ่ม","menu",[I("c_menu","เมนูลัดล่าง / สีแถบเมนู","menu"),I("c_chat","ปุ่มแชทลอย (รูป + ขนาด)","chat")]],
+["ประกาศและแจ้งเตือน","info",[I("a_info","ข้อความ / ติดต่อ / ป๊อปอัป","info"),I("c_ads","แถบประกาศ / รูป / วิดีโอ / โฆษณา","info"),I("c_notify","สีและขนาดแจ้งเตือน","bolt")]],
+["หน้าร้าน","shop",[I("shop","ดูหน้าร้านลูกค้า","shop")]],
+["บัญชี","user",[I("acct","บัญชี / โปรไฟล์ / รหัสผ่าน","user")]]
+];
+if(inC)out.push(["","wand",[["a_cust","","wand"]]]);
+return out;
+};
+
+/* ---------- 2) เมนู 3 ขีด: หมวดพับ/ขยายได้ ---------- */
+window.__mg=window.__mg||{};
+menuOpen=function(){
+const G=NAV();
+$("#mo").innerHTML=`<div class="ov dr" onclick="if(event.target==this)closeM()"><div class="dw"><div class="dh">${site.logo?`<img src="${esc(site.logo)}">`:""}<b>${esc(nm())}</b><button class="ib" onclick="closeM()">${ico("close")}</button></div>${me?`<div class="dme">${isAdm()?"ผู้ดูแล":esc(me.u)}${!isAdm()&&!MAIN?` · <span class="bal">${wal.credits||0} บาท</span>`:""}</div>`:""}<div class="dsc">${G.map(([g,L,ic],gi)=>{
+const has=L.some(x=>x[0]==tab),op=window.__mg[gi]!==undefined?window.__mg[gi]:has,bd=L.reduce((s,x)=>s+(+x[3]||0),0);
+return `<details ${op||has?"open":""} ontoggle="__mg[${gi}]=this.open"><summary><span class="gi">${ico(ic||"info")}</span>${g}${bd?`<span class="gb">${bd}</span>`:""}</summary><div class="gl">${L.map(([k,l,i2,b])=>`<button class="di ${tab==k?"on":""}" onclick="goT('${k}')"><span class="dic">${ico(i2)}</span><span>${l}</span>${b?`<span class="er ml">${b}</span>`:""}</button>`).join("")}</div></details>`}).join("")}</div><div class="dq"><button class="di" onclick="toggleTheme()"><span class="dic">${ico("moon")}</span><span>สลับโหมดมืด / สว่าง</span></button>${me?`<button class="di" onclick="logout()"><span class="dic">${ico("out")}</span><span>ออกจากระบบ</span></button>`:`<button class="di" onclick="authUI(0)"><span class="dic">${ico("login")}</span><span>เข้าสู่ระบบ / สมัครสมาชิก</span></button>`}</div></div></div>`;
+};
+
+/* ปุ่ม "ปรับแต่ง" ที่แถบล่าง ให้ไปหน้าแรกของหมวดหน้าตา */
+const _g=goT;
+goT=function(k){if(k=="a_cust"&&isAdm())k="a_brand";_g(k)};
+
+/* ---------- 3) การเงิน: ธนาคาร + TrueMoney อยู่ฟอร์มเดียว ปุ่มบันทึกเดียว ---------- */
+const _S=SCH;
+SCH=function(){
+const s=_S();
+s.pay.push(["a","twPay","TrueMoney: เบอร์ / ชื่อ (ว่างทั้งสองช่อง = ปิดการรับ TrueMoney)"],["f","twQr","รูป QR TrueMoney",500]);
+return s;
+};
+/* เว็บหลัก: ตอนลูกค้ากดเช่า โชว์ช่องทาง TrueMoney ด้วย */
+if(MAIN){
+const _rent=rent;
+rent=function(id){
+_rent(id);
+const m=document.querySelector("#mo .md"),f=m&&m.querySelector("#rsl");
+if(f&&(site.twPay||site.twQr)){
+const x=document.createElement("div");x.className="c";x.style.marginTop="10px";
+x.innerHTML=`<h3>หรือโอนผ่าน TrueMoney</h3>${site.twQr?`<img src="${esc(site.twQr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:8px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.twPay||"")}</div>`;
+f.before(x);
+}
+};
+}
+
+/* ---------- 4) หน้าย่อย: แยกจาก "ปรับแต่งทั้งหมด" เป็นหน้าละเรื่อง ---------- */
+const PG={
+c_menu:{t:"เมนูลัดล่าง / สีแถบเมนู",k:["เมนูลัดด้านล่าง","สีแถบเมนู"]},
+c_chat:{t:"ปุ่มแชทลอย",k:["ปุ่มแชทลอย (วงกลม)"]},
+c_bg:{t:"วิดีโอพื้นหลัง",k:["วิดีโอพื้นหลัง"]},
+c_ads:{t:"แถบประกาศ / รูป / วิดีโอ / โฆษณา",k:["ข้อความ + รูปประกาศ","วิดีโอป้ายประกาศหน้าหลัก","โฆษณา"]},
+c_notify:{t:"สีและขนาดแจ้งเตือน",k:["สีการแจ้งเตือน","ขนาดการแจ้งเตือน"]},
+c_welcome:{t:"เครดิตต้อนรับสมาชิกใหม่",k:["เครดิตต้อนรับสมาชิกใหม่"]}
+};
+const sizeCard=()=>{const v=+site.cbSize||58;return `<div class="c"><h3>ขนาดปุ่มแชทลอย</h3><div class="mu" style="margin-bottom:8px">ปรับได้ 40 - 120 px (ค่าเริ่มต้น 58)</div><label class="mu">ขนาด: <b id="cbv">${v}</b> px</label><input type="range" min="40" max="120" step="2" value="${v}" oninput="document.getElementById('cbv').textContent=this.value;document.documentElement.style.setProperty('--cbs',this.value+'px')" onchange="cuSet('cbSize',+this.value)"><button class="b s f" onclick="cuCbReset()">รีเซ็ตกลับ 58px</button></div>`};
+window.cuCbReset=async()=>{try{await D("settings/site").update({cbSize:firebase.firestore.FieldValue.delete()});await load();render();say("รีเซ็ตขนาดปุ่มแชทแล้ว",1)}catch(e){say(ERR(e))}};
+const applySize=()=>{const n=+site.cbSize,r=document.documentElement.style;n>=40&&n<=120?r.setProperty("--cbs",n+"px"):r.removeProperty("--cbs")};
+
+const _r=render;
+render=function(){
+const t=tab,p=PG[t];
+if(isAdm()&&p&&!(t=="c_welcome"&&MAIN)){
+/* ให้ระบบเดิมสร้างการ์ดทั้งหมดก่อน แล้วเลือกมาเฉพาะของหน้านี้ */
+inC=true;tab="a_cust";
+try{_r()}finally{tab=t;inC=false}
+const app=$("#app"),keep=[...app.querySelectorAll(":scope > .c")].filter(c=>{const h=c.querySelector("h3");return h&&p.k.some(n=>h.textContent.startsWith(n))});
+[...app.children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb"))e.remove()});
+app.insertAdjacentHTML("beforeend",`<h3 class="ph">${p.t}</h3>`);
+keep.forEach(c=>app.appendChild(c));
+if(t=="c_chat")app.insertAdjacentHTML("beforeend",sizeCard());
+if(!keep.length&&t!="c_chat")app.insertAdjacentHTML("beforeend",'<div class="c mu">ไม่มีการตั้งค่าในหน้านี้</div>');
+}else _r();
+applySize();
+};
+render();
+})();
+</script>
+
   
 
 
