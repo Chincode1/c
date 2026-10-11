@@ -945,6 +945,83 @@ render();
 })();
 </script>
 
+  <!-- วางต่อท้ายสุด (หลัง addon6) ก่อน </body> : วิดีโอป้ายประกาศหน้าหลัก + ลบพื้นหลัง -->
+<script>
+(()=>{
+const FV=()=>firebase.firestore.FieldValue;
+const ov=on=>{if(on){if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}}else $("#ld")?.remove()};
+let cache={k:null,u:null},pend=null;
+async function src(){
+if(site.nbN){
+const k=site.nbAt;if(cache.k===k)return cache.u;
+if(!pend||pend.k!==k)pend={k,p:(async()=>{let s="";for(let i=0;i<site.nbN;i++)s+=(await D("media/nb_"+i).get()).data().d;const b=await(await fetch(s)).blob();cache={k,u:URL.createObjectURL(b)};return cache.u})()};
+return pend.p;
+}
+return /^https:\/\//.test(site.nbv||"")?site.nbv:null;
+}
+function build(box,u){
+const m=site.nbMode||"none",v=document.createElement("video");
+v.src=u;v.autoplay=v.loop=v.muted=v.playsInline=true;v.setAttribute("muted","");
+const plain=()=>{v.style.cssText="width:100%;height:auto;display:block;"+(m=="black"?"mix-blend-mode:screen":m=="white"?"mix-blend-mode:multiply":"");if(!box.contains(v))box.appendChild(v)};
+if(m!="auto"){plain();v.play().catch(()=>{});return}
+v.style.cssText="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none";box.style.position="relative";
+const cv=document.createElement("canvas");cv.style.cssText="width:100%;height:auto;display:block";
+box.append(v,cv);v.play().catch(()=>{});
+const x=cv.getContext("2d",{willReadFrequently:true}),tol=+site.nbTol||90;let ref=null;
+const loop=()=>{
+if(!document.body.contains(cv))return;
+if(v.videoWidth&&!v.paused){
+const w=Math.min(v.videoWidth,480),h=Math.round(w*v.videoHeight/v.videoWidth);
+if(cv.width!==w){cv.width=w;cv.height=h}
+x.drawImage(v,0,0,w,h);
+try{
+const im=x.getImageData(0,0,w,h),d=im.data;
+if(!ref)ref=[d[0],d[1],d[2]];
+for(let i=0;i<d.length;i+=4){
+const df=Math.abs(d[i]-ref[0])+Math.abs(d[i+1]-ref[1])+Math.abs(d[i+2]-ref[2]);
+if(df<tol)d[i+3]=0;else if(df<tol*1.5)d[i+3]=(df-tol)/(tol*.5)*255;
+}
+x.putImageData(im,0,0);
+}catch(e){cv.remove();plain();return}
+}
+requestAnimationFrame(loop);
+};
+loop();
+}
+window.nbUp=async el=>{
+const f=el.files[0];if(!f)return;
+if(f.size>2.6e6)return say("วิดีโอใหญ่เกิน 2.5MB ตัดให้สั้น/บีบอัดก่อน หรือใช้ลิงก์แทน");
+ov(1);try{
+const u=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)});
+const n=Math.ceil(u.length/7e5);
+for(let i=0;i<n;i++)await D("media/nb_"+i).set({d:u.slice(i*7e5,(i+1)*7e5)});
+for(let i=n;i<(site.nbN||0);i++)await D("media/nb_"+i).delete();
+await D("settings/site").set({nbN:n,nbAt:Date.now()},{merge:true});
+await load();render();say("อัปโหลดวิดีโอป้ายประกาศแล้ว",1);
+}catch(e){say(ERR(e))}finally{ov(0)}
+};
+window.nbDel=async()=>{
+ov(1);try{
+for(let i=0;i<(site.nbN||0);i++)await D("media/nb_"+i).delete();
+await D("settings/site").update({nbN:FV().delete(),nbAt:FV().delete(),nbv:FV().delete()});
+await load();render();say("ลบวิดีโอแล้ว",1);
+}catch(e){say(ERR(e))}finally{ov(0)}
+};
+const opt=(v,l)=>`<option value="${v}" ${(site.nbMode||"none")==v?"selected":""}>${l}</option>`;
+const card=()=>`<div class="c"><h3>วิดีโอป้ายประกาศหน้าหลัก</h3><div class="mu" style="margin-bottom:8px">แสดงใต้หัวเว็บ อัปโหลดไม่เกิน 2.5MB หรือวางลิงก์ .mp4 (ถ้าใช้ "ลบสีตามมุมภาพ" กับลิงก์ ลิงก์ต้องรองรับ CORS ไม่งั้นให้อัปโหลดไฟล์แทน)</div><div class="mu">${site.nbN?"มีวิดีโอที่อัปโหลดอยู่":site.nbv?"ใช้ลิงก์อยู่":"ยังไม่มีวิดีโอ"}</div><input type="file" accept="video/*" onchange="nbUp(this)"><input placeholder="หรือลิงก์ https://....mp4" value="${esc(site.nbv||"")}" onchange="cuSet('nbv',this.value.trim())"><label class="mu">ลบพื้นหลังวิดีโอ</label><select onchange="cuSet('nbMode',this.value)">${opt("none","ไม่ลบ")}${opt("black","ลบพื้นดำ")}${opt("white","ลบพื้นขาว")}${opt("auto","ลบสีตามมุมภาพ (พื้นสีเรียบ)")}</select>${site.nbMode=="auto"?`<label class="mu">ความไวการลบสี: <b id="nbtv">${+site.nbTol||90}</b></label><input type="range" min="20" max="220" step="10" value="${+site.nbTol||90}" oninput="document.getElementById('nbtv').textContent=this.value" onchange="cuSet('nbTol',+this.value)">`:""}${site.nbN||site.nbv?`<button class="b d sm" onclick="nbDel()">ลบวิดีโอ</button>`:""}</div>`;
+const _r=render;render=function(){
+_r();
+const h=$("#app header");
+if(h&&tab!="acct"&&(site.nbN||site.nbv)){
+const box=document.createElement("div");box.id="nbv";box.style.cssText="width:100%;margin-bottom:14px";h.after(box);
+src().then(u=>{if(u&&document.body.contains(box))build(box,u)}).catch(()=>{});
+}
+if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",card());
+};
+render();
+})();
+</script>
+
   
   
   
