@@ -1162,6 +1162,63 @@ render();
 })();
 </script>
 
+  <!-- จัดเมนู 3 ขีดใหม่: จัดหมวด + พับ/ขยายได้ -->
+<style>
+.dsc details{margin-top:6px}
+.dsc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:11px 10px;font-size:14px;font-weight:600;color:var(--mntx,var(--tx));cursor:pointer;border-radius:12px;user-select:none}
+.dsc summary::-webkit-details-marker{display:none}
+.dsc summary:active{background:color-mix(in srgb,var(--ac) 8%,transparent)}
+.dsc summary .gi{display:flex;color:var(--ac)}
+.dsc summary .gb{background:var(--er);color:#fff;font-size:11px;font-weight:600;padding:0 7px;border-radius:99px;line-height:18px}
+.dsc summary::after{content:"";margin-left:auto;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s;opacity:.5}
+.dsc details[open]>summary::after{transform:rotate(-135deg)}
+.dsc details>.gl{margin:0 0 4px 21px;padding-left:8px;border-left:2px solid color-mix(in srgb,var(--tx) 12%,transparent)}
+.dsc .gl .di{padding:10px;font-size:14.5px}
+</style>
+<script>
+(()=>{
+const _N=NAV;
+/* กำหนดหมวดและลำดับ: [ชื่อหมวด, ไอคอน, [รหัสรายการ...]] */
+const LAY=()=>MAIN?(isAdm()?[
+["จัดการเว็บเช่า","shop",["a_rent","a_plan","a_shops"]],
+["การเงิน","card",["a_pay"]],
+["หน้าตาเว็บ","pal",["a_brand","a_look","a_anim","a_cust"]],
+["ข้อมูลและประกาศ","info",["a_info"]],
+["บัญชี","user",["acct"]]
+]:[
+["เช่าเว็บร้านค้า","tag",["plans","mine"]],
+["บัญชี","user",["acct"]]
+]):(isAdm()?[
+["ภาพรวม","chart",["a_dash"]],
+["สินค้า","box",["a_prod","shop"]],
+["การเงิน","bolt",["a_top","a_keys","a_gift","a_pay"]],
+["หน้าตาร้าน","pal",["a_brand","a_look","a_card","a_anim","a_cust"]],
+["ข้อมูลร้าน","info",["a_info"]],
+["บัญชี","user",["acct"]]
+]:[
+["ร้านค้า","shop",["shop","info"]],
+["เติมเงิน / ประวัติ","bolt",["top","his"]],
+["บัญชี","user",["acct"]]
+]);
+NAV=function(){
+const m={};_N().forEach(([g,L])=>L.forEach(i=>m[i[0]]=i));
+const used=new Set(),out=[];
+LAY().forEach(([t,ic,ks])=>{const L=ks.filter(k=>m[k]);L.forEach(k=>used.add(k));if(L.length)out.push([t,L.map(k=>m[k]),ic])});
+const rest=Object.keys(m).filter(k=>!used.has(k));
+if(rest.length)out.push(["อื่นๆ",rest.map(k=>m[k]),"info"]);
+return out;
+};
+window.__mg=window.__mg||{};
+menuOpen=function(){
+const G=NAV();
+$("#mo").innerHTML=`<div class="ov dr" onclick="if(event.target==this)closeM()"><div class="dw"><div class="dh">${site.logo?`<img src="${esc(site.logo)}">`:""}<b>${esc(nm())}</b><button class="ib" onclick="closeM()">${ico("close")}</button></div>${me?`<div class="dme">${isAdm()?"ผู้ดูแล":esc(me.u)}${!isAdm()&&!MAIN?` · <span class="bal">${wal.credits||0} บาท</span>`:""}</div>`:""}<div class="dsc">${G.map(([g,L,ic],gi)=>{
+const has=L.some(x=>x[0]==tab),op=window.__mg[gi]!==undefined?window.__mg[gi]:true,bd=L.reduce((s,x)=>s+(+x[3]||0),0);
+return `<details ${op||has?"open":""} ontoggle="__mg[${gi}]=this.open"><summary><span class="gi">${ico(ic||"info")}</span>${g}${bd?`<span class="gb">${bd}</span>`:""}</summary><div class="gl">${L.map(([k,l,i2,b])=>`<button class="di ${tab==k?"on":""}" onclick="goT('${k}')"><span class="dic">${ico(i2)}</span><span>${l}</span>${b?`<span class="er ml">${b}</span>`:""}</button>`).join("")}</div></details>`}).join("")}</div><div class="dq"><button class="di" onclick="toggleTheme()"><span class="dic">${ico("moon")}</span><span>สลับโหมดมืด / สว่าง</span></button>${me?`<button class="di" onclick="logout()"><span class="dic">${ico("out")}</span><span>ออกจากระบบ</span></button>`:`<button class="di" onclick="authUI(0)"><span class="dic">${ico("login")}</span><span>เข้าสู่ระบบ / สมัครสมาชิก</span></button>`}</div></div></div>`;
+};
+render();
+})();
+</script>
+
   
   
 
