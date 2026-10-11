@@ -842,6 +842,44 @@ render();
 #cb:not([data-k=""]) img{object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
 </style>
 
+  <!-- วางต่อจาก addon2.html (ก่อน </body>) : เพิ่มปุ่ม "ลบพื้นหลัง" ให้ทุกช่องอัปโหลดรูป -->
+<script>
+(()=>{
+window.__rmx=false;
+const SKIP=["ts","rsl","cf","pf"];
+const has=e=>e&&e.matches&&e.matches("label.cl")&&e.querySelector('input[type=checkbox][id*="rm"]');
+function scan(){
+document.querySelectorAll('input[type=file][accept="image/*"]').forEach(i=>{
+if(i.dataset.rmx||i.hidden||SKIP.includes(i.id))return;
+i.dataset.rmx=1;
+if(has(i.nextElementSibling)||has(i.previousElementSibling))return;
+const l=document.createElement("label");l.className="cl rmw";
+l.innerHTML='<span>ลบพื้นหลังรูปนี้ (ติ๊กก่อนเลือกรูป)</span><input type="checkbox" class="rmx">';
+const c=l.querySelector("input");c.checked=window.__rmx;c.onchange=()=>{window.__rmx=c.checked};
+i.after(l);
+});
+}
+new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});scan();
+const _p=pic;
+pic=(f,m,r)=>{
+const inp=[...document.querySelectorAll("input[type=file]")].find(x=>x.files&&x.files[0]===f);
+const on=r||!!(inp&&inp.nextElementSibling?.querySelector?.(".rmx")?.checked);
+return _p(f,on?Math.min(m,600):m,on?true:r);
+};
+})();
+</script>
+
+  <style>
+.hv .c,.hv header,.hv .nb,.hv #bn{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.hv select,.hv input,.hv textarea{background:transparent!important}
+.hv .c,.hv header,.hv #bn{border-color:rgba(255,255,255,.35)}
+.hv body,.hv .w{text-shadow:0 1px 3px rgba(0,0,0,.55)}
+.hv .b{text-shadow:none}
+</style>
+<script>
+addEventListener("pointerdown",()=>{document.querySelectorAll("#bgv,#bgv2").forEach(v=>v.play().catch(()=>{}))},{once:true});
+</script>
+
   
 
 
