@@ -1075,6 +1075,93 @@ render();
 })();
 </script>
 
+  <!-- วางต่อท้ายสุด (หลัง addon12) ก่อน </body> : เมนูแจกเครดิตให้ผู้เล่น (ฝั่งร้าน) -->
+<script>
+(()=>{
+if(MAIN)return;
+const FV=()=>firebase.firestore.FieldValue;
+const ov=on=>{if(on){if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}}else $("#ld")?.remove()};
+const _NAV=NAV;
+NAV=function(){const G=_NAV();if(isAdm()){const g=G.find(x=>x[0]=="การเงิน");if(g)g[1].push(["a_gift","แจกเครดิตให้ผู้เล่น","bolt"])}return G};
+window.giftQ="";
+window.giftList=()=>{
+const q=giftQ.toLowerCase();
+return accts.filter(a=>!q||a.id.toLowerCase().includes(q)).slice(0,60).map(a=>{const w=wals.find(x=>x.id==a.id);return `<div class="rw"><span><b>${esc(a.id)}</b><div class="mu">${(w&&w.credits)||0} บาท${a.banned?" · ระงับ":""}</div></span><button class="b sm" data-u="${esc(a.id)}" onclick="giftOne(this.dataset.u)">แจกเครดิต</button></div>`}).join("")||'<span class="mu">ไม่พบผู้เล่น</span>';
+};
+const page=()=>`<div class="c"><h3>แจกให้ผู้เล่นทุกคน</h3><div class="mu">สมาชิกทั้งหมด ${accts.length} คน</div><input id="ga" type="number" min="1" placeholder="จำนวนเครดิตต่อคน (บาท)"><input id="gn" placeholder="หมายเหตุ (ไม่ใส่ก็ได้)"><button class="b f" onclick="giftAll()">แจกทุกคน</button></div><div class="c"><h3>แจกรายคน</h3><input placeholder="ค้นหาชื่อผู้ใช้" oninput="giftQ=this.value;document.getElementById('gl').innerHTML=giftList()"><div id="gl">${giftList()}</div></div>`;
+async function give(users,amt,note){
+for(let i=0;i<users.length;i+=200){
+const b=R.batch();
+users.slice(i,i+200).forEach(u=>{
+b.set(D("wallets/"+u),{credits:FV().increment(amt)},{merge:true});
+b.set(C("topups").doc(),{u,amount:amt,at:Date.now(),status:"approved",method:"gift",note:note||""});
+});
+await b.commit();
+}
+}
+const chk=a=>a>0&&a<=100000;
+window.giftOne=u=>modal(`<h3 style="margin:0 0 6px">แจกเครดิตให้ ${esc(u)}</h3><input id="gx" type="number" min="1" placeholder="จำนวน (บาท)"><input id="gy" placeholder="หมายเหตุ (ไม่ใส่ก็ได้)"><button class="b f" data-u="${esc(u)}" onclick="giftGo(this.dataset.u)">ยืนยันแจก</button>`);
+window.giftGo=async u=>{
+const a=+$("#gx").value,n=$("#gy").value.trim();
+if(!chk(a))return say("กรอกจำนวน 1 - 100,000 บาท");
+if(busy)return;busy=true;ov(1);
+try{await give([u],a,n);closeM();await load();render();say("แจก "+a+" บาท ให้ "+u+" แล้ว",1)}catch(e){say(ERR(e))}finally{busy=false;ov(0)}
+};
+window.giftAll=async()=>{
+const a=+$("#ga").value,n=$("#gn").value.trim(),us=accts.filter(x=>!x.banned).map(x=>x.id);
+if(!chk(a))return say("กรอกจำนวน 1 - 100,000 บาท");
+if(!us.length)return say("ยังไม่มีสมาชิก");
+if(!confirm("แจก "+a+" บาท ให้ "+us.length+" คน (รวม "+a*us.length+" บาท)?"))return;
+if(busy)return;busy=true;ov(1);
+try{await give(us,a,n);await load();render();say("แจกให้ "+us.length+" คนแล้ว",1)}catch(e){say(ERR(e))}finally{busy=false;ov(0)}
+};
+const _r=render;render=function(){
+_r();
+if(tab=="a_gift"&&isAdm()){
+[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb"))e.remove()});
+$("#app").insertAdjacentHTML("beforeend",`<h3 class="ph">แจกเครดิตให้ผู้เล่น</h3>`+page());
+}
+};
+render();
+})();
+</script>
+
+  <!-- วางต่อท้ายสุด (หลัง addon13) ก่อน </body> : เติมเงินผ่าน TrueMoney แบบแอดมินตรวจสลิป (ไม่ต้องใช้เซิร์ฟเวอร์) -->
+<script>
+(()=>{
+if(MAIN)return;
+const ov=on=>{if(on){if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}}else $("#ld")?.remove()};
+const _t=topUI;
+topUI=function(){
+const on=site.twPay||site.twQr;
+const card=on?`<div class="c"><h3>เติมผ่าน TrueMoney (แอดมินตรวจสลิป)</h3>${site.twQr?`<img src="${esc(site.twQr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:10px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.twPay||"")}</div><input id="tma" type="number" min="1" placeholder="จำนวนเงิน (บาท)"><input id="tml" placeholder="ลิงก์ซองอั่งเปา (ถ้าส่งเป็นซอง)" autocapitalize="none"><label class="mu">แนบสลิป / ภาพหน้าจอ</label><input id="tms" type="file" accept="image/*"><button class="b f" id="tmb" onclick="sendTM()">แจ้งเติมเงิน TrueMoney</button></div>`:"";
+return card+_t();
+};
+window.sendTM=async()=>{
+const a=+($("#tma").value||0),f=$("#tms").files[0],l=($("#tml").value||"").trim();
+if(!(a>0))return say("กรอกจำนวนเงิน");
+if(!f)return say("แนบสลิปหรือภาพหน้าจอ");
+if(l&&!/^https:\/\/gift\.truemoney\.com\//.test(l))return say("ลิงก์อั่งเปาต้องขึ้นต้น https://gift.truemoney.com/");
+if(busy)return;busy=true;ov(1);
+try{
+const d={u:me.u,amount:a,img:await pic(f,600),at:Date.now(),status:"pending",method:"truemoney"};
+if(l)d.link=l;
+await D("topups/"+rs()).set(d);
+await load();render();say("แจ้งเติมเงินแล้ว รอแอดมินตรวจสอบ",1);
+}catch(e){say(ERR(e))}finally{busy=false;ov(0)}
+};
+const tag=t=>t.method=="truemoney"?'<span class="chip ok">TrueMoney</span>':t.method=="angpao"?'<span class="chip ok">อั่งเปาอัตโนมัติ</span>':t.method=="gift"?'<span class="chip">แจกเครดิต</span>':"";
+adTopUI=function(){
+return `<div class="c"><h3>รายการแจ้งโอน</h3>${tops.slice(0,60).map(t=>`<div class="rw"><div style="min-width:0"><b>${esc(t.u)}</b> · ${t.amount} บาท ${tag(t)}<div class="mu">${fd(t.at)}</div>${/^https:\/\//.test(t.link||"")?`<a class="mu" style="word-break:break-all" href="${esc(t.link)}" target="_blank" rel="noopener">เปิดลิงก์ซองอั่งเปา</a>`:""}${t.note?`<div class="mu">${esc(t.note)}</div>`:""}</div><span class="ac">${t.img?`<button class="b s sm" onclick="showImg('${t.id}')">สลิป</button>`:""}${t.status=="pending"?`<button class="b sm" onclick="decide('${t.id}',1)">อนุมัติ</button><button class="b d sm" onclick="decide('${t.id}',0)">ปฏิเสธ</button>`:stChip(t.status)}</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`;
+};
+const _r=render;render=function(){
+_r();
+if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",`<div class="c cu"><h3>รับเงินผ่าน TrueMoney (ตรวจสลิปเอง)</h3><div class="mu" style="margin-bottom:8px">ใส่เบอร์/ชื่อ TrueMoney Wallet และ QR ลูกค้าจะแจ้งโอนพร้อมสลิป หรือแนบลิงก์ซองอั่งเปา แล้วคุณกดอนุมัติในเมนู "รายการโอน" ว่างทั้งสองช่อง = ปิด</div><textarea placeholder="เช่น TrueMoney 0812345678 ชื่อ สมชาย / โอนหรือส่งซองอั่งเปาเข้าเบอร์นี้" onchange="cuSet('twPay',this.value.trim())">${esc(site.twPay||"")}</textarea>${site.twQr?`<img class="pv" src="${esc(site.twQr)}">`:'<div class="mu">ยังไม่มีรูป QR</div>'}<input type="file" accept="image/*" onchange="cuUp('twQr',500,this)">${site.twQr?`<button class="b d sm" onclick="cuDel('twQr')">ลบรูป QR</button>`:""}</div>`);
+};
+render();
+})();
+</script>
+
   
   
 
