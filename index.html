@@ -1239,7 +1239,72 @@ render();
 })();
 </script>
 
-  
+  <!-- ย้ายช่องตั้งค่า TrueMoney ไปไว้หน้าบัญชีรับโอน (ร่วมกับธนาคาร) -->
+<script>
+(()=>{
+if(MAIN)return;
+const _r=render;render=function(){
+_r();
+if(!isAdm())return;
+/* เอาการ์ดเดิมออกจากหน้าปรับแต่งทั้งหมด */
+if(tab=="a_cust"){
+document.querySelectorAll("#app .c.cu").forEach(e=>{const h=e.querySelector("h3");if(h&&h.textContent.startsWith("รับเงินผ่าน TrueMoney"))e.remove()});
+}
+/* ใส่การ์ดใหม่ในหน้าบัญชีรับโอน */
+if(tab=="a_pay"){
+$("#app").insertAdjacentHTML("beforeend",`<div class="c cu" style="margin-top:14px"><h3>รับเงินผ่าน TrueMoney</h3><div class="mu" style="margin-bottom:8px">ใส่เบอร์/ชื่อ TrueMoney Wallet และ QR ลูกค้าจะแจ้งโอนพร้อมสลิป หรือแนบลิงก์ซองอั่งเปา แล้วคุณกดอนุมัติในเมนู "รายการโอน" ว่างทั้งสองช่อง = ปิด (ช่องนี้บันทึกอัตโนมัติ ไม่ต้องกดปุ่มบันทึกด้านบน)</div><textarea placeholder="เช่น TrueMoney 0812345678 ชื่อ สมชาย / โอนหรือส่งซองอั่งเปาเข้าเบอร์นี้" onchange="cuSet('twPay',this.value.trim())">${esc(site.twPay||"")}</textarea>${site.twQr?`<img class="pv" src="${esc(site.twQr)}">`:'<div class="mu">ยังไม่มีรูป QR</div>'}<input type="file" accept="image/*" onchange="cuUp('twQr',500,this)">${site.twQr?`<button class="b d sm" onclick="cuDel('twQr')">ลบรูป QR</button>`:""}</div>`);
+}
+};
+render();
+})();
+</script>
+
+  <!-- รวมการ์ดในหน้า "ปรับแต่งทั้งหมด" เป็นหมวด -->
+<style>
+.cg{margin-bottom:12px;border:1px solid var(--bd);border-radius:16px;overflow:hidden}
+.cg>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:15px 16px;font-weight:600;font-size:16px;cursor:pointer;user-select:none}
+.cg>summary::-webkit-details-marker{display:none}
+.cg>summary .gi{display:flex;color:var(--ac)}
+.cg>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s;opacity:.5}
+.cg[open]>summary::after{transform:rotate(-135deg)}
+.cg>.cgb{padding:0 12px 4px}
+.cg .c{border-radius:12px}
+</style>
+<script>
+(()=>{
+const GR=[
+["แชท","chat",["ปุ่มแชทลอย (วงกลม)","ขนาดปุ่มแชทลอย"]],
+["เมนู","menu",["เมนูลัดด้านล่าง","สีแถบเมนู"]],
+["การแจ้งเตือน","bolt",["สีการแจ้งเตือน","ขนาดการแจ้งเตือน"]],
+["ประกาศ / โฆษณา","info",["ข้อความ + รูปประกาศ","วิดีโอป้ายประกาศหน้าหลัก","โฆษณา"]],
+["พื้นหลัง","pal",["วิดีโอพื้นหลัง"]],
+["สินค้า / สมาชิก","box",["หมวดหมู่สินค้า","เครดิตต้อนรับสมาชิกใหม่"]]
+];
+window.__cg=window.__cg||{};
+const _r=render;render=function(){
+_r();
+if(tab!="a_cust"||!isAdm())return;
+const cards=[...document.querySelectorAll("#app > .c")];
+const used=new Set();
+const anchor=cards[0];
+const wrap=document.createElement("div");
+GR.forEach(([t,ic,names],gi)=>{
+const mine=cards.filter(c=>{const h=c.querySelector("h3");return h&&names.some(n=>h.textContent.startsWith(n))});
+if(!mine.length)return;
+mine.forEach(c=>used.add(c));
+const d=document.createElement("details");d.className="cg";
+if(window.__cg[gi])d.open=true;
+d.ontoggle=()=>{window.__cg[gi]=d.open};
+d.innerHTML=`<summary><span class="gi">${ico(ic)}</span>${t}</summary><div class="cgb"></div>`;
+const b=d.querySelector(".cgb");mine.forEach(c=>b.appendChild(c));
+wrap.appendChild(d);
+});
+if(anchor)anchor.before(wrap);else $("#app").appendChild(wrap);
+};
+render();
+})();
+</script>
+
   
 
 
