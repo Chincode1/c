@@ -879,7 +879,74 @@ return _p(f,on?Math.min(m,600):m,on?true:r);
 <script>
 addEventListener("pointerdown",()=>{document.querySelectorAll("#bgv,#bgv2").forEach(v=>v.play().catch(()=>{}))},{once:true});
 </script>
+<!-- วางต่อท้ายสุด (หลัง addon3 และโค้ดพื้นหลังวิดีโอ) ก่อน </body> -->
+<style>
+.dw{background:var(--mnbg,var(--bg))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.dw .dh b,.dw .di{color:var(--mntx,var(--tx))!important;text-shadow:none!important}
+.dw h4,.dw .dme{color:var(--mntx,var(--tx))!important;opacity:.6;text-shadow:none!important}
+.dw .di .dic{color:var(--mntx,var(--tx))!important;opacity:.75}
+.dw .di.on{background:color-mix(in srgb,var(--mnac,var(--ac)) 18%,transparent)!important;color:var(--mnac,var(--ac))!important;font-weight:600}
+.dw .di.on .dic{color:var(--mnac,var(--ac))!important;opacity:1}
+.dw .dh,.dw .dme,.dw .dq{border-color:color-mix(in srgb,var(--mntx,var(--tx)) 15%,transparent)!important}
+.dw button.ib{color:var(--mntx,var(--tx))}
+.hv #bn,#bn{background:var(--bnbg,color-mix(in srgb,var(--bg) 92%,transparent))!important}
+</style>
+<script>
+(()=>{
+const K={mnBg:"--mnbg",mnTx:"--mntx",mnAc:"--mnac",bnBg:"--bnbg"};
+const apply=()=>{const r=document.documentElement.style;for(const k in K){/^#[0-9a-f]{6}$/i.test(site[k]||"")?r.setProperty(K[k],site[k]):r.removeProperty(K[k])}};
+window.cuMnReset=async()=>{try{await D("settings/site").update(Object.fromEntries(Object.keys(K).map(k=>[k,firebase.firestore.FieldValue.delete()])));await load();render();say("รีเซ็ตสีเมนูแล้ว",1)}catch(e){say(ERR(e))}};
+const row=(k,l,d)=>`<label class="mu">${l}</label><input type="color" value="${hx(site[k],d)}" onchange="cuSet('${k}',this.value)">`;
+const _r=render;render=function(){
+_r();apply();
+if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>สีแถบเมนู</h3><div class="mu" style="margin-bottom:8px">เมนู 3 ขีด (ทึบ อ่านง่าย) และเมนูลัดด้านล่าง</div>${row("mnBg","พื้นหลังเมนู 3 ขีด","#ffffff")}${row("mnTx","ตัวอักษรเมนู 3 ขีด","#161616")}${row("mnAc","สีรายการที่เลือกอยู่","#0f766e")}${row("bnBg","พื้นหลังเมนูลัดด้านล่าง","#ffffff")}<button class="b s f" onclick="cuMnReset()">รีเซ็ตกลับค่าเดิม</button></div>`);
+};
+render();
+})();
+</script>
+<!-- วางต่อท้ายสุด (หลัง addon4) ก่อน </body> -->
+<style>
+.ts,.ts.er{background:var(--tsbg,var(--bg))!important;color:var(--tstx,var(--tx))!important;border-color:var(--tsok,var(--ok))!important}
+.ts.er{border-color:var(--tser,var(--er))!important}
+.nb{background:var(--nbbg,transparent)!important;color:var(--nbtx,inherit)!important}
+</style>
+<script>
+(()=>{
+const K={tsBg:"--tsbg",tsTx:"--tstx",tsOk:"--tsok",tsEr:"--tser",nbBg:"--nbbg",nbTx:"--nbtx"};
+const apply=()=>{const r=document.documentElement.style;for(const k in K){/^#[0-9a-f]{6}$/i.test(site[k]||"")?r.setProperty(K[k],site[k]):r.removeProperty(K[k])}};
+window.cuNtReset=async()=>{try{await D("settings/site").update(Object.fromEntries(Object.keys(K).map(k=>[k,firebase.firestore.FieldValue.delete()])));await load();render();say("รีเซ็ตสีแจ้งเตือนแล้ว",1)}catch(e){say(ERR(e))}};
+window.cuNtTest=()=>{say("ตัวอย่างแจ้งเตือนสำเร็จ",1);setTimeout(()=>say("ตัวอย่างแจ้งเตือนผิดพลาด"),600)};
+const row=(k,l,d)=>`<label class="mu">${l}</label><input type="color" value="${hx(site[k],d)}" onchange="cuSet('${k}',this.value)">`;
+const _r=render;render=function(){
+_r();apply();
+if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>สีการแจ้งเตือน</h3><div class="mu" style="margin-bottom:8px">กล่องแจ้งเตือนด้านบน (สำเร็จ / ผิดพลาด) และแถบประกาศวิ่ง</div>${row("tsBg","พื้นหลังกล่องแจ้งเตือน","#ffffff")}${row("tsTx","ตัวอักษรแจ้งเตือน","#161616")}${row("tsOk","ขอบเมื่อสำเร็จ","#15803d")}${row("tsEr","ขอบเมื่อผิดพลาด","#c62828")}${row("nbBg","พื้นหลังแถบประกาศวิ่ง","#ffffff")}${row("nbTx","ตัวอักษรแถบประกาศวิ่ง","#161616")}<button class="b f" onclick="cuNtTest()">ทดสอบการแจ้งเตือน</button><button class="b s f" onclick="cuNtReset()">รีเซ็ตกลับค่าเดิม</button></div>`);
+};
+render();
+})();
+</script>
 
+  <!-- วางต่อท้ายสุด (หลัง addon5) ก่อน </body> -->
+<style>
+#tw{zoom:var(--tss,1);width:min(calc(92vw / var(--tss,1)),360px)}
+#tpo .rg,#tpo h2,#tpo .am,#tpo .mu{zoom:var(--tps,1)}
+</style>
+<script>
+(()=>{
+const apply=()=>{const r=document.documentElement.style;
+[["tsSz","--tss"],["tpSz","--tps"]].forEach(([k,v])=>{const n=+site[k];n>=.5&&n<=2?r.setProperty(v,n):r.removeProperty(v)})};
+window.cuSzReset=async()=>{try{await D("settings/site").update({tsSz:firebase.firestore.FieldValue.delete(),tpSz:firebase.firestore.FieldValue.delete()});await load();render();say("รีเซ็ตขนาดแล้ว",1)}catch(e){say(ERR(e))}};
+window.cuSzTest=k=>{if(k=="top"){lastTp=0;topDone(100)}else say("ตัวอย่างแจ้งเตือนปกติ",1)};
+const sl=(k,l)=>{const v=+site[k]||1;return `<label class="mu">${l}: <b id="sv_${k}">${Math.round(v*100)}%</b></label><input type="range" min="0.6" max="1.6" step="0.1" value="${v}" oninput="document.getElementById('sv_${k}').textContent=Math.round(this.value*100)+'%'" onchange="cuSet('${k}',+this.value)">`};
+const _r=render;render=function(){
+_r();apply();
+if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>ขนาดการแจ้งเตือน</h3><div class="mu" style="margin-bottom:8px">ปรับแยกกัน เล็กสุด 60% ใหญ่สุด 160%</div>${sl("tsSz","แจ้งเตือนปกติ (เช่น บันทึกแล้ว)")}<button class="b s sm" onclick="cuSzTest('n')">ทดสอบ</button>${sl("tpSz","แจ้งเตือนเติมเงินสำเร็จ (หน้าจอเขียว)")}<button class="b s sm" onclick="cuSzTest('top')">ทดสอบ</button><button class="b s f" onclick="cuSzReset()">รีเซ็ตกลับ 100%</button></div>`);
+};
+render();
+})();
+</script>
+
+  
+  
   
 
 
