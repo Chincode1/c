@@ -6,59 +6,52 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
-:root{--bg:#fafaf8;--tx:#161616;--mu:#7b7b76;--bd:#e6e6e1;--ac:#0f766e;--ok:#15803d;--er:#c62828;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121212;--tx:#f0f0ec;--mu:#8d8d88;--bd:#2a2a28}}
-:root[data-theme="dark"]{--bg:#121212;--tx:#f0f0ec;--mu:#8d8d88;--bd:#2a2a28}
+:root{--bg:#fafaf8;--tx:#161616;--mu:#7b7b76;--bd:#e6e6e1;--ac:#0f766e;--ac2:#fff;--ok:#15803d;--er:#c62828;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 "Noto Sans Thai",system-ui,sans-serif}
 .w{max-width:720px;margin:0 auto;padding:0 18px 130px}
-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:18px 0;border-bottom:1px solid var(--bd);margin-bottom:22px}
-.lg{font-weight:600;font-size:18px}.bal{font-weight:600;color:var(--ac)}
-.mu{color:var(--mu);font-size:14px}.r{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.c{border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:14px}.c h3{margin:0 0 6px;font-size:16px;font-weight:600}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:18px 0;border-bottom:1px solid var(--bd);margin-bottom:20px}
+.lg{font-weight:600;font-size:18px;display:flex;align-items:center;gap:8px}.lg img{height:28px;max-width:110px;object-fit:contain}
+.bal{font-weight:600;color:var(--ac)}.mu{color:var(--mu);font-size:14px}.r{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.c{border:1px solid var(--bd);border-radius:16px;padding:18px;margin-bottom:14px}.c h3{margin:0 0 6px;font-size:16px;font-weight:600}
 input,textarea,select{width:100%;padding:12px 14px;margin:6px 0;border:1px solid var(--bd);border-radius:10px;background:transparent;color:var(--tx);font:inherit;outline:0}
-input:focus,textarea:focus{border-color:var(--ac)}
-.b{padding:12px 20px;border:1px solid var(--ac);border-radius:10px;background:var(--ac);color:#fff;font:inherit;font-weight:500;cursor:pointer}
-.b.s{background:transparent;color:var(--tx);border-color:var(--bd)}.b.d{background:var(--er);border-color:var(--er)}.b.sm{padding:7px 13px;font-size:13px}.b:disabled{opacity:.45}.b.f{width:100%;margin-top:8px}
+select{background:var(--bg)}input[type=color]{height:44px;padding:4px}input:focus,textarea:focus{border-color:var(--ac)}
+.b{padding:12px 20px;border:1px solid var(--ac);border-radius:10px;background:var(--ac);color:var(--ac2);font:inherit;font-weight:500;cursor:pointer}
+.b.s{background:transparent;color:var(--tx);border-color:var(--bd)}.b.d{background:var(--er);border-color:var(--er);color:#fff}.b.sm{padding:7px 13px;font-size:13px}.b:disabled{opacity:.45}.b.f{width:100%;margin-top:8px}
 .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px 14px}
-.p{cursor:pointer}.p .im{aspect-ratio:1;background:var(--bd);border-radius:12px;overflow:hidden}.p img{width:100%;height:100%;object-fit:cover;display:block}
+.p{cursor:pointer}.p .im{aspect-ratio:1;background:var(--bd);border-radius:10px;overflow:hidden}.p img{width:100%;height:100%;object-fit:cover;display:block}
 .p b{display:block;font-weight:500;margin-top:8px;line-height:1.35}
-.pr{display:block;font-size:20px;font-weight:600;color:var(--tx)}.pr small{font-size:13px;font-weight:400;color:var(--mu)}
-.rw{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bd)}.rw:last-child{border:0}
+.pr{display:block;font-size:20px;font-weight:600}.pr small{font-size:13px;font-weight:400;color:var(--mu)}
+.rw{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 0;border-bottom:1px solid var(--bd)}.rw:last-child{border:0}
 .ac{display:flex;gap:6px;flex-wrap:wrap}
 #nv{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--bg);border-top:1px solid var(--bd);padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px);z-index:20}
 #nv button{flex:1;background:none;border:0;color:var(--mu);font:inherit;font-size:13px;padding:10px 0;cursor:pointer}#nv button.on{color:var(--ac);font-weight:600}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
 .md{background:var(--bg);border:1px solid var(--bd);border-radius:16px;max-width:400px;width:100%;max-height:90vh;overflow:auto;padding:20px;animation:pop .25s ease}
-.md .big{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;margin-bottom:12px}
+.big{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;margin-bottom:12px}
 .msg{padding:12px;border-radius:10px;background:var(--bd);white-space:pre-wrap;word-break:break-word;margin:10px 0}
-.atb{display:flex;gap:6px;margin-bottom:14px}.atb button{flex:1}
+.atb{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto}.atb button{flex:1;white-space:nowrap}
 #tw{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);width:min(92vw,360px);z-index:90;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.ts{background:var(--bg);border:1px solid var(--ok);color:var(--tx);padding:12px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);animation:pop .25s ease}.ts.er{border-color:var(--er)}
+.ts{background:var(--bg);border:1px solid var(--ok);padding:12px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);animation:pop .25s ease}.ts.er{border-color:var(--er)}
 .chip{font-size:12px;padding:2px 10px;border-radius:99px;border:1px solid var(--bd)}.chip.ok{color:var(--ok);border-color:var(--ok)}.chip.er{color:var(--er);border-color:var(--er)}
-#dn{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);cursor:pointer;animation:fin .3s}
-#dn .ci{width:120px;height:120px;border-radius:50%;background:var(--ok);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px color-mix(in srgb,var(--ok) 40%,transparent);animation:pop .6s cubic-bezier(.2,1.4,.4,1)}
-#dn path{stroke-dasharray:60;stroke-dashoffset:60;animation:dr .5s ease .4s forwards}
-#dn h2{margin:14px 0 0;font-size:28px}#dn .am{font-size:38px;font-weight:600;color:var(--ok)}
-#dn .msg{max-width:340px;width:100%;text-align:left}
-@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}@keyframes fin{from{opacity:0}}@keyframes dr{to{stroke-dashoffset:0}}
+.nb{border:1px solid var(--bd);border-radius:10px;padding:8px 12px;margin-bottom:16px;text-align:center;font-size:14px}
+@keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style></head><body>
 <div id="tw"></div><div class="w"><div id="app" class="mu">กำลังโหลด...</div></div><div id="mo"></div>
 <script>
-/* ===== ตั้งค่า: ใส่ค่า Firebase ของคุณ ===== */
+/* ===== ตั้งค่า ===== */
 const CFG={apiKey:"AIzaSyASvuyhGLcblkYWRuHhXOuIi2Gj6zYtzJU",authDomain:"chingame-ae1ce.firebaseapp.com",projectId:"chingame-ae1ce",appId:"1:691058862335:web:4f4597ec07c7a7245bc4ca"};
-const MAIN_HOST="deltastore.rexzy.xyz"; /* โดเมนเว็บหลัก (เว็บของคุณ) */
+const MAIN_HOST="deltastore.rexzy.xyz"; /* โดเมนเว็บหลัก */
+const SUBDOMAIN=false; /* true = ลิงก์ร้านเป็น ชื่อร้าน.โดเมน (ต้องตั้ง wildcard DNS) */
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const rs=()=>Math.random().toString(36).substring(2,10);
 const sha=async(p,s)=>Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(p+s)))).map(x=>x.toString(16).padStart(2,"0")).join("");
 const fd=t=>new Date(t).toLocaleString("th-TH");
-const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 
-/* รู้ว่าเป็นร้านไหนจากโดเมนย่อย หรือ ?shop=รหัส */
 const SHOP=(()=>{
 const q=new URLSearchParams(location.search).get("shop");
 if(q&&/^[a-z0-9-]{2,30}$/.test(q))return q;
@@ -66,130 +59,124 @@ const h=location.hostname;
 if(h.endsWith("."+MAIN_HOST)){const s=h.slice(0,-MAIN_HOST.length-1).split(".").pop();if(/^[a-z0-9-]{2,30}$/.test(s)&&s!=="www")return s}
 return"main";
 })();
-const B=SHOP==="main"?"":"shops/"+SHOP+"/";
+const MAIN=SHOP==="main",B=MAIN?"":"shops/"+SHOP+"/";
+const LS={get:k=>{try{return localStorage.getItem(k+"_"+SHOP)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k+"_"+SHOP,v)}catch(e){}}};
 const OK=!!(window.firebase&&CFG.projectId);
 if(OK)firebase.initializeApp(CFG);
 const R=OK?firebase.firestore():null,D=p=>R.doc(B+p),C=c=>R.collection(B+c);
 
-let TIER=0,plans=[],rentals=[],me=null,site={},products=[],wal={credits:0,orders:[]},tab="shop",asub="prod",shops=[],keys=[],busy=false;
-try{me=JSON.parse(LS.get("sess_"+SHOP)||"null")}catch(e){}
+let plans=[],rentals=[],shops=[],me=null,site={},products=[],wal={credits:0,orders:[]},tops=[],keys=[],tab="",asub="prod",busy=false,qs="";
+try{me=JSON.parse(LS.get("sess")||"null")}catch(e){}
+const isAdm=()=>me&&me.role==="admin";
 
 function say(m,ok){const t=document.createElement("div");t.className="ts"+(ok?"":" er");t.textContent=m;$("#tw").appendChild(t);setTimeout(()=>t.remove(),3200)}
 const ERR=e=>e&&(e.code=="permission-denied"?"ไม่มีสิทธิ์เขียนฐานข้อมูล (ตรวจ Firestore Rules)":e.message||e.code)||"ผิดพลาด";
 const closeM=()=>$("#mo").innerHTML="";
-function modal(h){$("#mo").innerHTML=`<div class="ov" onclick="if(event.target==this)closeM()"><div class="md">${h}</div></div>`}
-function done(title,amt,sub){
-const o=document.createElement("div");o.id="dn";
-o.innerHTML=`<div class="ci"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2>${esc(title)}</h2>${amt?`<div class="am">${esc(amt)}</div>`:""}${sub?`<div class="msg">${esc(sub)}</div>`:""}<div class="mu">แตะเพื่อปิด</div>`;
-o.onclick=()=>o.remove();document.body.appendChild(o);
+const modal=h=>$("#mo").innerHTML=`<div class="ov" onclick="if(event.target==this)closeM()"><div class="md">${h}</div></div>`;
+function pic(file,max){return new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);ok(c.toDataURL(max<=300?"image/png":"image/jpeg",.75))};i.onerror=()=>no(Error("เปิดรูปไม่ได้"));i.src=fr.result};fr.onerror=()=>no(Error("อ่านไฟล์ไม่ได้"));fr.readAsDataURL(file)})}
+
+/* ===== ธีม (ร้านปรับแต่งได้) ===== */
+const FONTS=["Noto Sans Thai","Prompt","Kanit","Sarabun"];
+const hx=(c,d)=>/^#[0-9a-f]{6}$/i.test(c||"")?c:d;
+const lum=h=>{const n=parseInt(h.slice(1),16),f=x=>{x/=255;return x<=.04?x/12.92:((x+.055)/1.055)**2.4};return .2126*f(n>>16)+.7152*f(n>>8&255)+.0722*f(n&255)};
+const vr=(bg,tx,ac)=>`--bg:${bg};--tx:${tx};--ac:${ac};--ac2:${lum(ac)>.45?"#111":"#fff"};--mu:color-mix(in srgb,${tx} 50%,${bg});--bd:color-mix(in srgb,${tx} 12%,${bg})`;
+function theme(){
+const ac=hx(site.ac,"#0f766e"),r=site.radius??10,f=FONTS.includes(site.font)?site.font:"Noto Sans Thai";
+let css=`:root{${vr(hx(site.bgL,"#fafaf8"),hx(site.txL,"#161616"),ac)}}@media(prefers-color-scheme:dark){:root{${vr(hx(site.bgD,"#121212"),hx(site.txD,"#f0f0ec"),hx(site.acD,ac))}}}`;
+css+=`body{font-family:"${f}",system-ui,sans-serif}.c,.md{border-radius:${+r+6}px}.b,input,textarea,select,.p .im{border-radius:${+r}px}.g{grid-template-columns:repeat(auto-fill,minmax(${+site.tile||150}px,1fr))}`;
+let el=$("#thm");if(!el){el=document.createElement("style");el.id="thm";document.head.appendChild(el)}
+el.textContent=css;
+let l=$("#fl");if(!l){l=document.createElement("link");l.id="fl";l.rel="stylesheet";document.head.appendChild(l)}
+l.href="https://fonts.googleapis.com/css2?family="+f.replace(/ /g,"+")+":wght@400;500;600&display=swap";
+document.title=site.name||(MAIN?"เช่าเว็บร้านค้า":"ร้านค้า");
 }
-function pic(file,max){return new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",.75))};i.onerror=()=>no(Error("เปิดรูปไม่ได้"));i.src=fr.result};fr.onerror=()=>no(Error("อ่านไฟล์ไม่ได้"));fr.readAsDataURL(file)})}
 
 /* ===== โหลดข้อมูล ===== */
 async function load(){
+const g=async q=>(await q.get().catch(()=>({docs:[]}))).docs.map(x=>({id:x.id,...x.data()}));
 const s=await D("settings/site").get().catch(()=>({exists:false}));
-site=s.exists?s.data():{};
-if(site.ac&&/^#[0-9a-f]{6}$/i.test(site.ac))document.documentElement.style.setProperty("--ac",site.ac);
-document.title=site.name||"ร้านค้า";applyTheme();
-if(SHOP!=="main"){
-const p=await C("products").get().catch(()=>({docs:[]}));
-products=p.docs.map(x=>({id:x.id,...x.data()}));
-if(me&&me.role!=="admin"){const w=await D("wallets/"+me.u).get().catch(()=>({exists:false}));wal=w.exists?w.data():{credits:0,orders:[]}}
-}
-if(SHOP==="main"){
-const q=await C("plans").get().catch(()=>({docs:[]}));
-plans=q.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>a.price-b.price);
-if(me){const rq=me.role==="admin"?await C("rentals").get().catch(()=>({docs:[]})):await C("rentals").where("u","==",me.u).get().catch(()=>({docs:[]}));
-rentals=rq.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>b.at-a.at)}
-}
-if(me&&me.role==="admin"){
-if(SHOP==="main"){const q=await R.collection("shops_meta").get();shops=q.docs.map(x=>({id:x.id,...x.data()}))}
-else{const q=await C("keys").get().catch(()=>({docs:[]}));keys=q.docs.map(x=>({id:x.id,...x.data()}))}
+site=s.exists?s.data():{};theme();
+if(MAIN){
+plans=(await g(C("plans"))).sort((a,b)=>a.price-b.price);
+if(me)rentals=(await g(isAdm()?C("rentals"):C("rentals").where("u","==",me.u))).sort((a,b)=>b.at-a.at);
+if(isAdm())shops=await g(R.collection("shops_meta"));
+}else{
+products=await g(C("products"));
+if(me&&!isAdm()){const w=await D("wallets/"+me.u).get().catch(()=>({exists:false}));wal=w.exists?w.data():{credits:0,orders:[]};tops=(await g(C("topups").where("u","==",me.u))).sort((a,b)=>b.at-a.at)}
+if(isAdm()){tops=(await g(C("topups"))).sort((a,b)=>b.at-a.at);keys=await g(C("keys"))}
 }
 }
-const add=(u,n)=>R.runTransaction(async t=>{
-const r=D("wallets/"+u),s=await t.get(r),d=s.exists?s.data():{credits:0,orders:[]};
-if((d.credits||0)+n<0)throw Error("ยอดเงินไม่พอ");
-t.set(r,{...d,credits:(d.credits||0)+n});
-});
 
-/* ===== เข้าสู่ระบบ / สมัคร (ชื่อผู้ใช้ + รหัสผ่านเท่านั้น) ===== */
+/* ===== เข้าสู่ระบบ (ลูกค้า + แอดมินใช้ฟอร์มเดียวกัน) ===== */
 function authUI(up){
 modal(`<div class="atb"><button class="b sm ${up?"s":""}" onclick="authUI(0)">เข้าสู่ระบบ</button><button class="b sm ${up?"":"s"}" onclick="authUI(1)">สมัครสมาชิก</button></div><input id="au" placeholder="ชื่อผู้ใช้" autocapitalize="none"><input id="ap" type="password" placeholder="รหัสผ่าน (อย่างน้อย 4 ตัว)"><button class="b f" onclick="doAuth(${up})">${up?"สมัครสมาชิก":"เข้าสู่ระบบ"}</button>`);
 }
 async function doAuth(up){
-const u=$("#au").value.trim(),pw=$("#ap").value;
+const u=$("#au").value.trim(),pw=$("#ap").value,adm=u.toLowerCase()==="admin";
 if(!/^[A-Za-z0-9_.-]{4,30}$/.test(u))return say("ชื่อผู้ใช้ 4-30 ตัว (A-Z a-z 0-9 _ . -)");
 if(pw.length<4)return say("รหัสผ่านอย่างน้อย 4 ตัว");
-/* ถ้าเข้าสู่ระบบด้วยชื่อ admin ให้ตรวจแบบผู้ดูแล */
-if(!up&&u.toLowerCase()==="admin")return doAdm();
-if(up&&u.toLowerCase()==="admin")return say("ชื่อนี้ใช้ไม่ได้");
+if(adm&&up)return say("ชื่อนี้ใช้ไม่ได้");
 try{
-const r=D("accounts/"+u),s=await r.get();let role="user";
+if(adm){
+const s=await D("admins/admin").get();
+if(!s.exists)return say("ยังไม่ได้ตั้งรหัสผู้ดูแล");
+const d=s.data();if(d.hash!==await sha(pw,d.salt))return say("รหัสผ่านไม่ถูกต้อง");
+me={u:"admin",role:"admin"};tab="adm";
+}else{
+const r=D("accounts/"+u),s=await r.get();
 if(up){
 if(s.exists)return say("ชื่อนี้ถูกใช้แล้ว");
 const salt=rs();
-await r.set({hash:await sha(pw,salt),salt,role:"user",at:Date.now()});
-await D("wallets/"+u).set({credits:+site.welcome||0,orders:[]});
+await r.set({hash:await sha(pw,salt),salt,at:Date.now()});
+if(!MAIN)await D("wallets/"+u).set({credits:+site.welcome||0,orders:[]});
 }else{
 if(!s.exists)return say("ไม่พบชื่อผู้ใช้");
 const d=s.data();
 if(d.hash!==await sha(pw,d.salt))return say("รหัสผ่านไม่ถูกต้อง");
 if(d.banned)return say("บัญชีนี้ถูกระงับ");
 }
-me={u,role};LS.set("sess_"+SHOP,JSON.stringify(me));closeM();
-await load();render();say(up?"สมัครสำเร็จ":"เข้าสู่ระบบสำเร็จ",1);
+me={u,role:"user"};
+}
+LS.set("sess",JSON.stringify(me));closeM();await load();render();say(up?"สมัครสำเร็จ":"เข้าสู่ระบบสำเร็จ",1);
 }catch(e){say(ERR(e))}
 }
-function admLogin(){
-modal(`<h3 style="margin:0 0 6px">เข้าสู่ระบบผู้ดูแล</h3><div class="mu">แยกจากบัญชีลูกค้า</div><input id="au" placeholder="ชื่อผู้ดูแล" value="admin" autocapitalize="none"><input id="ap" type="password" placeholder="รหัสผ่านผู้ดูแล"><button class="b f" onclick="doAdm()">เข้าสู่ระบบ</button>`);
-}
-async function doAdm(){
-const u=$("#au").value.trim(),pw=$("#ap").value;
-if(!/^[A-Za-z0-9_.-]{3,30}$/.test(u)||!pw)return say("กรอกข้อมูลให้ครบ");
-try{
-const s=await D("admins/"+u).get();
-if(!s.exists)return say("ไม่พบผู้ดูแลชื่อนี้");
-const d=s.data();
-if(d.hash!==await sha(pw,d.salt))return say("รหัสผ่านไม่ถูกต้อง");
-me={u,role:"admin"};LS.set("sess_"+SHOP,JSON.stringify(me));closeM();tab="adm";
-await load();render();say("เข้าสู่ระบบผู้ดูแลสำเร็จ",1);
-}catch(e){say(ERR(e))}
-}
-function logout(){me=null;wal={credits:0,orders:[]};LS.set("sess_"+SHOP,"");tab="shop";render()}
+function logout(){me=null;wal={credits:0,orders:[]};LS.set("sess","");tab="";render()}
 
 /* ===== หน้าหลัก ===== */
 function render(){
 const T=[];
-if(SHOP!=="main"){T.push(["shop","สินค้า"]);if(me&&me.role!=="admin")T.push(["top","เติมเงิน"],["his","ประวัติ"])}
-if(SHOP==="main"){T.push(["plans","แพ็กเกจเช่า"]);if(me&&me.role!=="admin")T.push(["mine","การเช่าของฉัน"])}
-if(me&&me.role==="admin")T.push(["adm","แอดมิน"]);
-if(!T.some(t=>t[0]===tab))tab=T.length?T[0][0]:"home";
-let h=`<header><span class="lg">${TIER>=1&&site.logo?`<img src="${esc(site.logo)}" style="height:26px;vertical-align:middle;margin-right:8px">`:""}${esc(site.name||(SHOP==="main"?"เช่าเว็บร้านค้า":"ร้านค้า"))}</span><span class="r" style="gap:12px">${me&&me.role!=="admin"&&SHOP!=="main"?`<span class="bal">${wal.credits||0} บาท</span>`:""}${me?`<button class="b s sm" onclick="logout()">ออก</button>`:`<button class="b sm" onclick="authUI(0)">เข้าสู่ระบบ</button>`}</span></header>`;
-if(TIER>=1&&site.notice)h+=`<div class="c mu" style="text-align:center">${esc(site.notice)}</div>`;
-if(tab==="home")h+=`<div class="c"><h3>เช่าเว็บร้านค้าสำเร็จรูป</h3><div class="mu" style="white-space:pre-wrap">${esc(site.contact||"ติดต่อผู้ให้บริการเพื่อเปิดร้านของคุณ")}</div></div>`;
-if(tab==="shop")h+=shopUI();
-if(tab==="top")h+=topUI();
-if(tab==="his")h+=hisUI();
-if(tab==="plans")h+=plansUI();
-if(tab==="mine")h+=mineUI();
-if(tab==="adm")h+=SHOP==="main"?platUI():adminUI();
-$("#app").innerHTML=h+(me?"":'<div style="text-align:center;margin-top:30px"><a class="mu" href="#" onclick="admLogin();return false">สำหรับผู้ดูแล</a></div>');
+if(MAIN){T.push(["plans","แพ็กเกจเช่า"]);if(me&&!isAdm())T.push(["mine","การเช่าของฉัน"])}
+else{T.push(["shop","สินค้า"]);if(me&&!isAdm())T.push(["top","เติมเงิน"],["his","ประวัติ"])}
+if(isAdm())T.push(["adm","แอดมิน"]);
+if(!T.some(t=>t[0]===tab))tab=T[0][0];
+const nm=site.name||(MAIN?"เช่าเว็บร้านค้า":"ร้านค้า");
+let h=`<header><span class="lg">${site.logo?`<img src="${esc(site.logo)}">`:""}${esc(nm)}</span><span class="r" style="gap:10px">${me&&!isAdm()&&!MAIN?`<span class="bal">${wal.credits||0} บาท</span>`:""}${me?`<button class="b s sm" onclick="logout()">ออก</button>`:`<button class="b sm" onclick="authUI(0)">เข้าสู่ระบบ</button>`}</span></header>`;
+if(site.notice)h+=`<div class="nb">${esc(site.notice)}</div>`;
+if(tab=="shop")h+=shopUI();
+if(tab=="top")h+=topUI();
+if(tab=="his")h+=`<div class="c"><h3>ประวัติสั่งซื้อ</h3>${(wal.orders||[]).slice().reverse().map(o=>`<div class="rw"><div><b>${esc(o.name)}</b><div class="mu">${fd(o.at)}</div></div><b>${o.price} บาท</b></div>`).join("")||'<span class="mu">ยังไม่มี</span>'}</div>`;
+if(tab=="plans")h+=plansUI();
+if(tab=="mine")h+=mineUI();
+if(tab=="adm")h+=MAIN?platUI():adminUI();
+$("#app").innerHTML=h;
 let n=$("#nv");
 if(T.length>1){if(!n){n=document.createElement("div");n.id="nv";document.body.appendChild(n)}n.innerHTML=T.map(([k,l])=>`<button class="${tab==k?"on":""}" onclick="goT('${k}')">${l}</button>`).join("")}else if(n)n.remove();
 }
-function goT(k){tab=k;render();scrollTo(0,0)}
+const goT=k=>{tab=k;render();scrollTo(0,0)};
 
-/* ===== ร้านค้า ===== */
-const pr=p=>`<span class="pr">${p.price} <small>บาท</small></span>`;
+/* ===== ร้านค้า (ฝั่งลูกค้า) ===== */
 const oos=p=>p.stock!=null&&p.stock!==""&&+p.stock<=0;
 function shopUI(){
-const L=products.filter(p=>!p.hide),bn=TIER>=2&&site.banner?`<img src="${esc(site.banner)}" style="width:100%;border-radius:14px;margin-bottom:16px;display:block">`:"";
-return bn+(L.length?`<div class="g">${L.map(p=>`<div class="p" onclick="detail('${p.id}')"><div class="im">${p.img?`<img src="${esc(p.img)}" loading="lazy">`:""}</div><b>${esc(p.name)}</b>${pr(p)}${oos(p)?'<span class="mu">สินค้าหมด</span>':""}</div>`).join("")}</div>`:'<div class="c mu">ยังไม่มีสินค้า</div>');
+const L=products.filter(p=>!p.hide&&(!qs||(p.name||"").toLowerCase().includes(qs.toLowerCase())));
+return (site.banner?`<img src="${esc(site.banner)}" style="width:100%;border-radius:14px;margin-bottom:16px;display:block">`:"")+`<input placeholder="ค้นหาสินค้า" value="${esc(qs)}" oninput="qs=this.value;document.getElementById('gr').innerHTML=grid()"><div id="gr">${grid()}</div>`;
+}
+function grid(){
+const L=products.filter(p=>!p.hide&&(!qs||(p.name||"").toLowerCase().includes(qs.toLowerCase())));
+return L.length?`<div class="g">${L.map(p=>`<div class="p" onclick="detail('${p.id}')"><div class="im">${p.img?`<img src="${esc(p.img)}" loading="lazy">`:""}</div><b>${esc(p.name)}</b><span class="pr">${p.price} <small>บาท</small></span>${oos(p)?'<span class="mu">สินค้าหมด</span>':""}</div>`).join("")}</div>`:'<div class="c mu">ไม่พบสินค้า</div>';
 }
 function detail(id){
 if(!me){authUI(0);return say("เข้าสู่ระบบก่อนสั่งซื้อ")}
-if(me.role==="admin")return say("ผู้ดูแลสั่งซื้อไม่ได้ ใช้บัญชีลูกค้าแทน");
+if(isAdm())return say("ผู้ดูแลสั่งซื้อไม่ได้ ใช้บัญชีลูกค้าแทน");
 const p=products.find(x=>x.id==id);if(!p)return;
 modal(`${p.img?`<img class="big" src="${esc(p.img)}">`:""}<h3 style="margin:0">${esc(p.name)}</h3><p class="mu" style="white-space:pre-wrap">${esc(p.desc||"")}</p>${p.stock!=null&&p.stock!==""&&!oos(p)?`<p class="mu">คงเหลือ ${p.stock} ชิ้น</p>`:""}<div class="r"><span style="font-size:26px;font-weight:600">${p.price} <small class="mu">บาท</small></span>${oos(p)?'<button class="b" disabled>สินค้าหมด</button>':`<button class="b" id="bb" onclick="buy('${p.id}')">สั่งซื้อ</button>`}</div>`);
 }
@@ -198,48 +185,34 @@ if(busy)return;busy=true;const b=$("#bb");if(b)b.disabled=true;
 try{
 let msg="";
 await R.runTransaction(async t=>{
-const pr_=D("products/"+id),wr=D("wallets/"+me.u);
-const [ps,ws]=await Promise.all([t.get(pr_),t.get(wr)]);
+const pr=D("products/"+id),wr=D("wallets/"+me.u);
+const [ps,ws]=await Promise.all([t.get(pr),t.get(wr)]);
 if(!ps.exists)throw Error("ไม่พบสินค้า");
 const p=ps.data(),d=ws.exists?ws.data():{credits:0,orders:[]};
 if(p.stock!=null&&p.stock!==""&&+p.stock<=0)throw Error("สินค้าหมด");
 if((d.credits||0)<p.price)throw Error("ยอดเงินไม่พอ กรุณาเติมเงิน");
 t.set(wr,{...d,credits:d.credits-p.price,orders:[...(d.orders||[]),{name:p.name,price:p.price,at:Date.now()}]});
-if(p.stock!=null&&p.stock!=="")t.update(pr_,{stock:+p.stock-1});
+if(p.stock!=null&&p.stock!=="")t.update(pr,{stock:+p.stock-1});
 msg=p.message||"ขอบคุณที่ใช้บริการ";
 });
-closeM();await load();render();done("สั่งซื้อสำเร็จ","",msg);
+await load();render();
+modal(`<h3 style="margin:0">สั่งซื้อสำเร็จ</h3><div class="msg" style="user-select:all">${esc(msg)}</div><button class="b f" onclick="closeM()">ปิด</button>`);
 }catch(e){if(b)b.disabled=false;say(ERR(e))}
 finally{busy=false}
 }
-const hisUI=()=>`<div class="c"><h3>ประวัติสั่งซื้อ</h3>${(wal.orders||[]).slice().reverse().map(o=>`<div class="rw"><div><b>${esc(o.name)}</b><div class="mu">${fd(o.at)}</div></div><b>${o.price} บาท</b></div>`).join("")||'<span class="mu">ยังไม่มี</span>'}</div>`;
 
-/* ===== เติมเงิน: ตรวจสลิปอัตโนมัติ + ใส่คีย์ ===== */
+/* ===== เติมเงิน: แนบสลิป (แอดมินอนุมัติ) + คีย์ ===== */
 function topUI(){
-return `<div class="c"><h3>เติมเงินด้วยสลิป</h3>${site.slipApi?`${site.qr?`<img src="${esc(site.qr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:10px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.pay||"")}</div><input id="ta" type="number" min="1" placeholder="จำนวนเงินที่โอน (บาท)"><input id="ts" type="file" accept="image/*"><button class="b f" id="tb" onclick="sendSlip()">ตรวจสลิปและเติมเงิน</button>`:'<div class="mu">ร้านนี้ยังไม่เปิดเติมเงินด้วยสลิป</div>'}</div><div class="c"><h3>ใส่คีย์เติมเงิน</h3><input id="k" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters"><button class="b f" onclick="redeem()">ยืนยัน</button></div>`;
+return `<div class="c"><h3>เติมเงินด้วยสลิป</h3>${site.qr||site.pay?`${site.qr?`<img src="${esc(site.qr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:10px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.pay||"")}</div><input id="ta" type="number" min="1" placeholder="จำนวนเงินที่โอน (บาท)"><input id="ts" type="file" accept="image/*"><button class="b f" id="tb" onclick="sendSlip()">แจ้งโอน</button>`:'<div class="mu">ร้านนี้ยังไม่เปิดเติมเงินด้วยสลิป</div>'}</div><div class="c"><h3>ใส่คีย์เติมเงิน</h3><input id="k" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters"><button class="b f" onclick="redeem()">ยืนยัน</button></div>${tops.length?`<div class="c"><h3>ประวัติแจ้งโอน</h3>${tops.map(t=>`<div class="rw"><span>${t.amount} บาท<div class="mu">${fd(t.at)}</div></span>${stChip(t.status)}</div>`).join("")}</div>`:""}`;
 }
+const SN={pending:["รอตรวจสอบ",""],approved:["อนุมัติแล้ว","ok"],rejected:["ไม่อนุมัติ","er"],done:["เปิดร้านแล้ว","ok"]};
+const stChip=s=>`<span class="chip ${SN[s][1]}">${SN[s][0]}</span>`;
 async function sendSlip(){
 const a=+($("#ta").value||0),f=$("#ts").files[0];
-if(!(a>0))return say("กรอกจำนวนเงิน");
-if(!f)return say("แนบสลิป");
-if(busy)return;busy=true;const b=$("#tb");b.disabled=true;b.textContent="กำลังตรวจสลิป...";
-try{
-const fm=new FormData();fm.append("file",f);fm.append("amount",a);
-const d=await(await fetch(site.slipApi,{method:"POST",body:fm})).json().catch(()=>({}));
-if(!d.ok)throw Error(d.message||"ตรวจสลิปไม่ผ่าน");
-const ref=String(d.transRef||"").replace(/[^A-Za-z0-9]/g,"");
-if(!ref)throw Error("อ่านรหัสอ้างอิงสลิปไม่ได้");
-await R.runTransaction(async t=>{
-const sr=D("slips/"+ref),wr=D("wallets/"+me.u);
-const [s,w]=await Promise.all([t.get(sr),t.get(wr)]);
-if(s.exists)throw Error("สลิปนี้ถูกใช้แล้ว");
-const x=w.exists?w.data():{credits:0,orders:[]};
-t.set(sr,{u:me.u,amount:a,at:Date.now()});
-t.set(wr,{...x,credits:(x.credits||0)+a});
-});
-await load();render();done("เติมเงินสำเร็จ","+"+a+" บาท");
-}catch(e){b.disabled=false;b.textContent="ตรวจสลิปและเติมเงิน";say(ERR(e))}
-finally{busy=false}
+if(!(a>0))return say("กรอกจำนวนเงิน");if(!f)return say("แนบสลิป");
+if(busy)return;busy=true;const b=$("#tb");b.disabled=true;
+try{await D("topups/"+rs()).set({u:me.u,amount:a,img:await pic(f,600),at:Date.now(),status:"pending"});await load();render();say("แจ้งโอนแล้ว รอแอดมินตรวจสอบ",1)}
+catch(e){b.disabled=false;say(ERR(e))}finally{busy=false}
 }
 async function redeem(){
 const c=$("#k").value.trim().toUpperCase();if(!c)return say("กรอกคีย์");
@@ -255,40 +228,53 @@ const x=w.exists?w.data():{credits:0,orders:[]};
 t.update(kr,{used:true,usedBy:me.u,usedAt:Date.now()});
 t.set(wr,{...x,credits:(x.credits||0)+val});
 });
-await load();render();done("เติมเงินสำเร็จ","+"+val+" บาท");
-}catch(e){say(ERR(e))}
-finally{busy=false}
+await load();render();say("เติมเงินสำเร็จ +"+val+" บาท",1);
+}catch(e){say(ERR(e))}finally{busy=false}
 }
 
 /* ===== แอดมินร้าน ===== */
 function adminUI(){
-const S=[["prod","สินค้า"],["keys","คีย์"],["set","ตั้งค่า"]];
-let h=`<div class="atb">${S.map(([k,l])=>`<button class="b sm ${asub==k?"":"s"}" onclick="asub='${k}';render()">${l}</button>`).join("")}</div>`;
-if(asub==="prod")h+=`<div class="c"><h3>เพิ่มสินค้า</h3><input id="pn" placeholder="ชื่อสินค้า"><input id="pq" type="number" placeholder="ราคา (บาท)"><input id="pk" type="number" placeholder="สต็อก (เว้นว่าง = ไม่จำกัด)"><input id="pi" type="file" accept="image/*"><textarea id="pd" placeholder="คำอธิบาย"></textarea><textarea id="pm" placeholder="ข้อความที่ลูกค้าได้รับหลังซื้อ (เช่น ไอดี/รหัส/ลิงก์)"></textarea><button class="b f" onclick="addProd()">เพิ่มสินค้า</button></div><div class="c"><h3>สินค้าทั้งหมด</h3>${products.map(p=>`<div class="rw"><span><b>${esc(p.name)}</b> ${p.price} บาท${p.stock!=null&&p.stock!==""?` · เหลือ ${p.stock}`:""}</span><span class="ac"><button class="b s sm" onclick="hideProd('${p.id}',${!p.hide})">${p.hide?"แสดง":"ซ่อน"}</button><button class="b d sm" onclick="delProd('${p.id}')">ลบ</button></span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`;
-if(asub==="keys"){
-const U=keys.filter(k=>!k.used);
-h+=`<div class="c"><h3>สร้างคีย์เติมเงิน</h3><input id="ka" type="number" placeholder="จำนวนเงินต่อคีย์ (บาท)"><input id="kn" type="number" value="1" placeholder="จำนวนคีย์"><button class="b f" onclick="genKeys()">สร้างคีย์</button><div id="ko" class="msg" style="display:none;user-select:all"></div></div><div class="c"><h3>คีย์ที่ยังไม่ใช้ (${U.length})</h3>${U.slice(0,100).map(k=>`<div class="rw"><span><b>${esc(k.id)}</b> ${k.credits} บาท</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`;
-}
-if(asub==="set")h+=`<div class="c"><h3>ข้อมูลร้าน</h3><input id="sn" placeholder="ชื่อร้าน" value="${esc(site.name||"")}"><label class="mu">สีหลัก</label><input id="sc" type="color" value="${esc(site.ac||"#0f766e")}" style="height:44px;padding:4px"><input id="sw" type="number" placeholder="เงินต้อนรับสมาชิกใหม่ (บาท)" value="${+site.welcome||""}"></div><div class="c"><h3>เติมเงินด้วยสลิป</h3><div class="mu">ใส่ลิงก์ Worker ตรวจสลิป (SlipOK / EasySlip) ถ้าเว้นว่างจะปิดระบบสลิป</div><input id="sa" placeholder="https://xxx.workers.dev" value="${esc(site.slipApi||"")}"><textarea id="sp" placeholder="ข้อมูลบัญชีรับโอน">${esc(site.pay||"")}</textarea><label class="mu">รูป QR</label><input id="sq" type="file" accept="image/*"></div>${appearUI()}<button class="b f" onclick="saveSet()">บันทึก</button>`;
+const S=[["prod","สินค้า"],["top","รายการโอน"],["keys","คีย์"],["set","ตั้งค่า / ธีม"]],P=tops.filter(t=>t.status=="pending");
+let h=`<div class="atb">${S.map(([k,l])=>`<button class="b sm ${asub==k?"":"s"}" onclick="asub='${k}';render()">${l}${k=="top"&&P.length?` (${P.length})`:""}</button>`).join("")}</div>`;
+if(asub=="prod")h+=`<div class="c"><h3>เพิ่มสินค้า</h3><input id="pn" placeholder="ชื่อสินค้า"><input id="pq" type="number" placeholder="ราคา (บาท)"><input id="pk" type="number" placeholder="สต็อก (เว้นว่าง = ไม่จำกัด)"><input id="pi" type="file" accept="image/*"><textarea id="pd" placeholder="คำอธิบาย"></textarea><textarea id="pm" placeholder="ข้อความที่ลูกค้าได้รับหลังซื้อ (ไอดี/รหัส/ลิงก์)"></textarea><button class="b f" onclick="addProd()">เพิ่มสินค้า</button></div><div class="c"><h3>สินค้าทั้งหมด</h3>${products.map(p=>`<div class="rw"><span><b>${esc(p.name)}</b> ${p.price} บาท${p.stock!=null&&p.stock!==""?` · เหลือ ${p.stock}`:""}</span><span class="ac"><button class="b s sm" onclick="editProd('${p.id}')">แก้ไข</button><button class="b s sm" onclick="hideProd('${p.id}',${!p.hide})">${p.hide?"แสดง":"ซ่อน"}</button><button class="b d sm" onclick="delProd('${p.id}')">ลบ</button></span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`;
+if(asub=="top")h+=`<div class="c"><h3>รายการแจ้งโอน</h3>${tops.slice(0,60).map(t=>`<div class="rw"><div><b>${esc(t.u)}</b> · ${t.amount} บาท<div class="mu">${fd(t.at)}</div></div><span class="ac"><button class="b s sm" onclick="showImg('${t.id}')">สลิป</button>${t.status=="pending"?`<button class="b sm" onclick="decide('${t.id}',1)">อนุมัติ</button><button class="b d sm" onclick="decide('${t.id}',0)">ปฏิเสธ</button>`:stChip(t.status)}</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`;
+if(asub=="keys"){const U=keys.filter(k=>!k.used);h+=`<div class="c"><h3>สร้างคีย์เติมเงิน</h3><input id="ka" type="number" placeholder="จำนวนเงินต่อคีย์ (บาท)"><input id="kn" type="number" value="1" placeholder="จำนวนคีย์"><button class="b f" onclick="genKeys()">สร้างคีย์</button><div id="ko" class="msg" style="display:none;user-select:all"></div></div><div class="c"><h3>คีย์ที่ยังไม่ใช้ (${U.length})</h3>${U.slice(0,100).map(k=>`<div class="rw"><span><b>${esc(k.id)}</b> ${k.credits} บาท</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`}
+if(asub=="set")h+=setUI(true);
 return h;
 }
-async function saveSet(){
+/* หน้าตั้งค่า/ธีม ใช้ร่วมกันทั้งร้านและเว็บหลัก */
+function setUI(shop){
+const v=(k,d)=>esc(site[k]??d),col=(i,l,k,d)=>`<label class="mu">${l}</label><input type="color" id="${i}" value="${v(k,d)}">`;
+return `<div class="c"><h3>ข้อมูล${shop?"ร้าน":"เว็บ"}</h3><input id="sn" placeholder="ชื่อ" value="${v("name","")}"><label class="mu">โลโก้</label><input id="sl" type="file" accept="image/*"><input id="sno" placeholder="ข้อความแถบประกาศ" value="${v("notice","")}">${shop?`<label class="mu">แบนเนอร์หน้าร้าน</label><input id="sb" type="file" accept="image/*"><input id="sw" type="number" placeholder="เงินต้อนรับสมาชิกใหม่ (บาท)" value="${+site.welcome||""}">`:`<textarea id="sct" placeholder="ราคาเช่า / ช่องทางติดต่อ">${esc(site.contact||"")}</textarea>`}</div><div class="c"><h3>${shop?"บัญชีรับโอน":"บัญชีรับโอนค่าเช่า"}</h3><textarea id="spy" placeholder="ข้อมูลบัญชีรับโอน">${v("pay","")}</textarea><label class="mu">รูป QR</label><input id="sq" type="file" accept="image/*"></div><div class="c"><h3>สี · โหมดสว่าง</h3>${col("cbl","พื้นหลัง","bgL","#fafaf8")}${col("ctl","ตัวอักษร","txL","#161616")}${col("cac","สีหลัก","ac","#0f766e")}</div><div class="c"><h3>สี · โหมดมืด</h3>${col("cbd","พื้นหลัง","bgD","#121212")}${col("ctd","ตัวอักษร","txD","#f0f0ec")}${col("cad","สีหลัก","acD",site.ac||"#0f766e")}</div><div class="c"><h3>ตัวอักษรและรูปทรง</h3><label class="mu">ฟอนต์</label><select id="sfo">${FONTS.map(f=>`<option ${site.font==f?"selected":""}>${f}</option>`).join("")}</select><label class="mu">ความโค้งมุม (px)</label><input id="srd" type="number" min="0" max="24" value="${site.radius??10}">${shop?`<label class="mu">ขนาดการ์ดสินค้า (px)</label><input id="stl" type="number" min="110" max="260" step="10" value="${site.tile||150}">`:""}</div><button class="b f" onclick="saveSet(${shop})">บันทึก</button><button class="b s f" onclick="resetTheme()">รีเซ็ตสีและรูปทรง</button>`;
+}
+async function saveSet(shop){
 try{
-const d={...site,name:$("#sn").value.trim(),ac:$("#sc").value,welcome:+$("#sw").value||0,slipApi:$("#sa").value.trim(),pay:$("#sp").value.trim()};
-const q=$("#sq").files[0];if(q)d.qr=await pic(q,500);
-if(TIER>=1){const l=$("#sl1").files[0];if(l)d.logo=await pic(l,300);d.notice=$("#sa1").value.trim();d.font=$("#sf1").value;d.radius=+$("#sr1").value}
-if(TIER>=2){const b=$("#sb2").files[0];if(b)d.banner=await pic(b,900);d.bgVideo=$("#sv2").value.trim()}
+const v=i=>$("#"+i)?.value??"";
+const d={...site,name:v("sn").trim(),notice:v("sno").trim(),pay:v("spy").trim(),bgL:v("cbl"),txL:v("ctl"),ac:v("cac"),bgD:v("cbd"),txD:v("ctd"),acD:v("cad"),font:v("sfo"),radius:+v("srd")};
+if(shop){d.welcome=+v("sw")||0;d.tile=+v("stl")||150}else d.contact=v("sct").trim();
+for(const [i,k,m] of [["sl","logo",300],["sb","banner",900],["sq","qr",500]]){const f=$("#"+i)?.files[0];if(f)d[k]=await pic(f,m)}
 await D("settings/site").set(d);await load();render();say("บันทึกแล้ว",1);
 }catch(e){say(ERR(e))}
+}
+async function resetTheme(){
+if(!confirm("รีเซ็ตสีและรูปทรงทั้งหมด?"))return;
+try{const d={...site};["bgL","txL","ac","bgD","txD","acD","font","radius","tile"].forEach(k=>delete d[k]);await D("settings/site").set(d);await load();render();say("รีเซ็ตแล้ว",1)}catch(e){say(ERR(e))}
 }
 async function addProd(){
 const name=$("#pn").value.trim(),price=+$("#pq").value,sk=$("#pk").value.trim();
 if(!name||!(price>0))return say("กรอกชื่อและราคา");
-try{
-const f=$("#pi").files[0];
-await C("products").add({name,price,stock:sk===""?null:+sk,img:f?await pic(f,600):"",desc:$("#pd").value.trim(),message:$("#pm").value.trim()||"ขอบคุณ",sold:0});
-await load();render();say("เพิ่มสินค้าแล้ว",1);
-}catch(e){say(ERR(e))}
+try{const f=$("#pi").files[0];
+await C("products").add({name,price,stock:sk===""?null:+sk,img:f?await pic(f,600):"",desc:$("#pd").value.trim(),message:$("#pm").value.trim()||"ขอบคุณ"});
+await load();render();say("เพิ่มสินค้าแล้ว",1)}catch(e){say(ERR(e))}
+}
+function editProd(id){
+const p=products.find(x=>x.id==id);if(!p)return;
+modal(`<h3 style="margin:0 0 6px">แก้ไขสินค้า</h3><input id="en" value="${esc(p.name)}"><input id="eq" type="number" value="${p.price}"><input id="ek" type="number" placeholder="สต็อก (ว่าง = ไม่จำกัด)" value="${p.stock??""}"><textarea id="ed">${esc(p.desc||"")}</textarea><textarea id="em">${esc(p.message||"")}</textarea><button class="b f" onclick="saveProd('${id}')">บันทึก</button>`);
+}
+async function saveProd(id){
+const price=+$("#eq").value,sk=$("#ek").value.trim();
+if(!(price>0))return say("ราคาไม่ถูกต้อง");
+try{await D("products/"+id).update({name:$("#en").value.trim(),price,stock:sk===""?null:+sk,desc:$("#ed").value.trim(),message:$("#em").value.trim()||"ขอบคุณ"});closeM();await load();render();say("บันทึกแล้ว",1)}catch(e){say(ERR(e))}
 }
 async function hideProd(id,h){try{await D("products/"+id).update({hide:h});await load();render()}catch(e){say(ERR(e))}}
 async function delProd(id){if(!confirm("ลบสินค้านี้?"))return;try{await D("products/"+id).delete();await load();render()}catch(e){say(ERR(e))}}
@@ -296,44 +282,50 @@ async function genKeys(){
 const a=+$("#ka").value,n=Math.min(100,+$("#kn").value||1);
 if(!(a>0))return say("กรอกจำนวนเงิน");
 const seg=()=>Math.random().toString(36).substring(2,6).toUpperCase().padEnd(4,"X"),out=[];
+try{for(let i=0;i<n;i++){const c=seg()+"-"+seg()+"-"+seg();await D("keys/"+c).set({credits:a,used:false});out.push(c)}
+const o=$("#ko");o.style.display="block";o.textContent=out.join("\n");say("สร้าง "+n+" คีย์",1)}catch(e){say(ERR(e))}
+}
+function showImg(id){const t=tops.find(x=>x.id==id)||rentals.find(x=>x.id==id);if(t&&t.img)modal(`<img class="big" src="${esc(t.img)}"><button class="b s f" onclick="closeM()">ปิด</button>`)}
+async function decide(id,ok){
+if(busy)return;busy=true;
 try{
-for(let i=0;i<n;i++){const c=seg()+"-"+seg()+"-"+seg();await D("keys/"+c).set({credits:a,used:false});out.push(c)}
-const o=$("#ko");o.style.display="block";o.textContent=out.join("\n");say("สร้าง "+n+" คีย์",1);
-}catch(e){say(ERR(e))}
+await R.runTransaction(async t=>{
+const tr=D("topups/"+id),s=await t.get(tr);
+if(!s.exists||s.data().status!=="pending")throw Error("ดำเนินการแล้ว");
+const x=s.data(),wr=D("wallets/"+x.u),w=ok?await t.get(wr):null;
+t.update(tr,{status:ok?"approved":"rejected"});
+if(ok){const d=w.exists?w.data():{credits:0,orders:[]};t.set(wr,{...d,credits:(d.credits||0)+x.amount})}
+});
+await load();render();say(ok?"อนุมัติแล้ว":"ปฏิเสธแล้ว",1);
+}catch(e){say(ERR(e))}finally{busy=false}
 }
 
-/* ===== แพ็กเกจเช่า / คำสั่งเช่า ===== */
+/* ===== เว็บหลัก: แพ็กเกจเช่า ===== */
 const TN={basic:"ธรรมดา",v1:"พรีเมียม V1",v2:"พรีเมียม V2"};
-const ST={pending:["รออนุมัติ",""],approved:["อนุมัติแล้ว","ok"],rejected:["ไม่อนุมัติ","er"],done:["เปิดร้านแล้ว","ok"]};
+const shopLink=id=>SUBDOMAIN?"https://"+id+"."+MAIN_HOST:location.origin+location.pathname+"?shop="+id;
 function plansUI(){
-const F={basic:"ตั้งชื่อร้าน สีหลัก เพิ่มสินค้า คีย์ เติมเงินด้วยสลิป",v1:"ทุกอย่างของธรรมดา + โลโก้ แถบประกาศ ฟอนต์ ความโค้งมุม",v2:"ทุกอย่างของ V1 + แบนเนอร์หน้าร้าน วิดีโอพื้นหลัง"};
 return (site.contact?`<div class="c mu" style="white-space:pre-wrap">${esc(site.contact)}</div>`:"")+Object.keys(TN).map(k=>{
 const L=plans.filter(p=>p.tier==k).sort((a,b)=>a.days-b.days);
-return L.length?`<div class="c"><h3>${TN[k]}</h3><div class="mu" style="margin-bottom:8px">${F[k]}</div>${L.map(p=>`<div class="rw"><b>เช่า ${p.days} วัน</b><span class="r" style="gap:12px"><span class="pr">${p.price} <small>บาท</small></span><button class="b sm" onclick="rent('${p.id}')">เช่า</button></span></div>`).join("")}</div>`:""
+return L.length?`<div class="c"><h3>${TN[k]}</h3>${L.map(p=>`<div class="rw"><b>เช่า ${p.days} วัน</b><span class="r" style="gap:12px"><span class="pr">${p.price} <small>บาท</small></span><button class="b sm" onclick="rent('${p.id}')">เช่า</button></span></div>`).join("")}</div>`:"";
 }).join("")||'<div class="c mu">ยังไม่มีแพ็กเกจ</div>';
 }
 function rent(id){
 if(!me){authUI(0);return say("เข้าสู่ระบบก่อนเช่า")}
-if(me.role==="admin")return say("ผู้ดูแลเช่าไม่ได้ ใช้บัญชีลูกค้าแทน");
+if(isAdm())return say("ผู้ดูแลเช่าไม่ได้ ใช้บัญชีลูกค้าแทน");
 const p=plans.find(x=>x.id==id);if(!p)return;
 modal(`<h3 style="margin:0">เช่า ${TN[p.tier]} ${p.days} วัน</h3><div style="font-size:26px;font-weight:600;margin:6px 0">${p.price} <small class="mu">บาท</small></div>${site.qr?`<img src="${esc(site.qr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:8px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.pay||"")}</div><div class="mu" style="margin:8px 0 4px">โอนแล้วแนบสลิป รอผู้ดูแลอนุมัติ</div><input id="rsl" type="file" accept="image/*"><button class="b f" id="rb" onclick="sendRent('${p.id}')">ส่งสลิป</button>`);
 }
 async function sendRent(id){
 const p=plans.find(x=>x.id==id),f=$("#rsl").files[0];
-if(!f)return say("แนบสลิป");
-if(busy)return;busy=true;const b=$("#rb");b.disabled=true;
-try{
-const img=await pic(f,600);
-await D("rentals/"+rs()).set({u:me.u,planId:p.id,tier:p.tier,days:p.days,price:p.price,img,at:Date.now(),status:"pending"});
-closeM();tab="mine";await load();render();say("ส่งสลิปแล้ว รอผู้ดูแลอนุมัติ",1);
-}catch(e){b.disabled=false;say(ERR(e))}
-finally{busy=false}
+if(!f)return say("แนบสลิป");if(busy)return;busy=true;const b=$("#rb");b.disabled=true;
+try{await D("rentals/"+rs()).set({u:me.u,tier:p.tier,days:p.days,price:p.price,img:await pic(f,600),at:Date.now(),status:"pending"});closeM();tab="mine";await load();render();say("ส่งสลิปแล้ว รอผู้ดูแลอนุมัติ",1)}
+catch(e){b.disabled=false;say(ERR(e))}finally{busy=false}
 }
 function mineUI(){
-return `<div class="c"><h3>การเช่าของฉัน</h3>${rentals.map(r=>`<div class="rw" style="flex-wrap:wrap"><div style="min-width:0"><b>${TN[r.tier]} ${r.days} วัน</b> <span class="chip ${ST[r.status][1]}">${ST[r.status][0]}</span><div class="mu">${fd(r.at)}</div>${r.status=="done"?`<div class="mu" style="word-break:break-all;user-select:all">${esc(shopLink(r.shop))}</div>`:""}</div>${r.status=="approved"?`<button class="b sm" onclick="shopForm('${r.id}')">ตั้งค่าร้านของคุณ</button>`:""}</div>`).join("")||'<span class="mu">ยังไม่มีรายการ ไปเลือกแพ็กเกจที่แท็บ "แพ็กเกจเช่า"</span>'}</div>`;
+return `<div class="c"><h3>การเช่าของฉัน</h3>${rentals.map(r=>`<div class="rw"><div style="min-width:0"><b>${TN[r.tier]} ${r.days} วัน</b> ${stChip(r.status)}<div class="mu">${fd(r.at)}</div>${r.status=="done"?`<div class="mu" style="word-break:break-all;user-select:all">${esc(shopLink(r.shop))}</div>`:""}</div>${r.status=="approved"?`<button class="b sm" onclick="shopForm('${r.id}')">ตั้งค่าร้านของคุณ</button>`:""}</div>`).join("")||'<span class="mu">ยังไม่มีรายการ ไปเลือกแพ็กเกจที่แท็บ "แพ็กเกจเช่า"</span>'}</div>`;
 }
 function shopForm(rid){
-modal(`<h3 style="margin:0 0 6px">ตั้งค่าร้านของคุณ</h3><div class="mu">ตั้งชื่อลิงก์ ชื่อร้าน และรหัสผ่านผู้ดูแลร้าน</div><input id="ni" placeholder="ชื่อลิงก์ (a-z 0-9 -) เช่น myshop" autocapitalize="none"><input id="nn" placeholder="ชื่อร้าน"><input id="np" type="password" placeholder="รหัสผ่านผู้ดูแลร้าน (อย่างน้อย 6 ตัว)"><button class="b f" onclick="makeShop('${rid}')">เปิดร้าน</button>`);
+modal(`<h3 style="margin:0 0 6px">ตั้งค่าร้านของคุณ</h3><div class="mu">ชื่อลิงก์จะเป็นที่อยู่ร้านของลูกค้าคุณ</div><input id="ni" placeholder="ชื่อลิงก์ (a-z 0-9 -) เช่น myshop" autocapitalize="none"><input id="nn" placeholder="ชื่อร้าน"><input id="np" type="password" placeholder="รหัสผ่านผู้ดูแลร้าน (อย่างน้อย 6 ตัว)"><button class="b f" onclick="makeShop('${rid}')">เปิดร้าน</button>`);
 }
 async function mkShop(id,name,pw,days,tier){
 const salt=rs();
@@ -342,8 +334,7 @@ await R.doc("shops/"+id+"/settings/site").set({name});
 await R.doc("shops_meta/"+id).set({name,tier,exp:Date.now()+days*864e5,at:Date.now(),off:false});
 }
 async function makeShop(rid){
-const id=$("#ni").value.trim().toLowerCase(),name=$("#nn").value.trim()||id,pw=$("#np").value;
-const r=rentals.find(x=>x.id==rid);
+const id=$("#ni").value.trim().toLowerCase(),name=$("#nn").value.trim()||id,pw=$("#np").value,r=rentals.find(x=>x.id==rid);
 if(!r||r.status!=="approved")return say("รายการนี้ยังไม่อนุมัติ");
 if(!/^[a-z0-9-]{2,30}$/.test(id)||["main","www","admin"].includes(id))return say("ชื่อลิงก์ไม่ถูกต้อง");
 if(pw.length<6)return say("รหัสผ่านอย่างน้อย 6 ตัว");
@@ -353,91 +344,63 @@ if((await R.doc("shops_meta/"+id).get()).exists)return say("ชื่อลิ�
 await mkShop(id,name,pw,r.days,r.tier);
 await D("rentals/"+rid).update({status:"done",shop:id});
 closeM();await load();render();say("เปิดร้านสำเร็จ",1);
-}catch(e){say(ERR(e))}
-finally{busy=false}
+}catch(e){say(ERR(e))}finally{busy=false}
 }
-/* ผู้ดูแลเว็บหลัก: อนุมัติ + จัดการแพ็กเกจ */
-function rentAdmin(){
-const P=rentals.filter(r=>r.status=="pending"),H=rentals.filter(r=>r.status!="pending").slice(0,30);
-const row=r=>`<div class="rw" style="flex-wrap:wrap"><div><b>${esc(r.u)}</b> · ${TN[r.tier]} ${r.days} วัน · ${r.price} บาท<div class="mu">${fd(r.at)}</div></div><span class="ac"><button class="b s sm" onclick="showSlip('${r.id}')">สลิป</button>${r.status=="pending"?`<button class="b sm" onclick="decideRent('${r.id}',1)">อนุมัติ</button><button class="b d sm" onclick="decideRent('${r.id}',0)">ปฏิเสธ</button>`:`<span class="chip ${ST[r.status][1]}">${ST[r.status][0]}</span>`}</span></div>`;
-return `<div class="c"><h3>รออนุมัติ (${P.length})</h3>${P.map(row).join("")||'<span class="mu">ไม่มี</span>'}</div>${H.length?`<div class="c"><h3>ประวัติคำสั่งเช่า</h3>${H.map(row).join("")}</div>`:""}`;
+
+/* ===== เว็บหลัก: แอดมิน ===== */
+function platUI(){
+const S=[["rent","คำสั่งเช่า"],["plan","แพ็กเกจ"],["shops","ร้านที่เช่า"],["set","ตั้งค่า / ธีม"]],P=rentals.filter(r=>r.status=="pending");
+if(!S.some(s=>s[0]==asub))asub="rent";
+let h=`<div class="atb">${S.map(([k,l])=>`<button class="b sm ${asub==k?"":"s"}" onclick="asub='${k}';render()">${l}${k=="rent"&&P.length?` (${P.length})`:""}</button>`).join("")}</div>`;
+if(asub=="rent")h+=`<div class="c"><h3>คำสั่งเช่า</h3>${rentals.slice(0,60).map(r=>`<div class="rw"><div><b>${esc(r.u)}</b> · ${TN[r.tier]} ${r.days} วัน · ${r.price} บาท<div class="mu">${fd(r.at)}</div></div><span class="ac"><button class="b s sm" onclick="showImg('${r.id}')">สลิป</button>${r.status=="pending"?`<button class="b sm" onclick="decideRent('${r.id}',1)">อนุมัติ</button><button class="b d sm" onclick="decideRent('${r.id}',0)">ปฏิเสธ</button>`:stChip(r.status)}</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`;
+if(asub=="plan")h+=`<div class="c"><h3>เพิ่มแพ็กเกจเช่า</h3><select id="gt">${Object.entries(TN).map(([k,n])=>`<option value="${k}">${n}</option>`).join("")}</select><select id="gd">${[1,2,3,4,5,6,7,14,30].map(d=>`<option value="${d}">${d} วัน</option>`).join("")}</select><input id="gp" type="number" placeholder="ราคา (บาท)"><button class="b f" onclick="addPlan()">เพิ่มแพ็กเกจ</button></div><div class="c"><h3>แพ็กเกจทั้งหมด</h3>${plans.map(p=>`<div class="rw"><span>${TN[p.tier]} · ${p.days} วัน · ${p.price} บาท</span><button class="b d sm" onclick="delPlan('${p.id}')">ลบ</button></div>`).join("")||'<span class="mu">ยังไม่มี</span>'}</div>`;
+if(asub=="shops")h+=`<div class="c"><h3>สร้างร้านให้ลูกค้าเช่า</h3><input id="ni" placeholder="ชื่อลิงก์ (a-z 0-9 -)" autocapitalize="none"><input id="nn" placeholder="ชื่อร้าน"><input id="np" placeholder="รหัสผ่านแอดมินของร้าน"><input id="nd" type="number" value="30" placeholder="จำนวนวัน"><select id="nt">${Object.entries(TN).map(([k,n])=>`<option value="${k}">${n}</option>`).join("")}</select><button class="b f" onclick="newShop()">สร้างร้าน</button></div><div class="c"><h3>ร้านที่เช่า (${shops.length})</h3>${shops.map(s=>{const ex=s.exp&&s.exp<Date.now();return `<div class="rw"><div style="min-width:0"><b>${esc(s.name||s.id)}</b> <span class="chip ${s.off||ex?"er":"ok"}">${s.off?"ระงับ":ex?"หมดอายุ":"ใช้งาน"}</span><div class="mu">หมดอายุ ${s.exp?fd(s.exp):"-"}</div><div class="mu" style="word-break:break-all;user-select:all">${esc(shopLink(s.id))}</div></div><span class="ac"><button class="b s sm" onclick="renew('${s.id}')">ต่อ 30 วัน</button><button class="b s sm" onclick="toggleShop('${s.id}',${!s.off})">${s.off?"เปิด":"ระงับ"}</button></span></div>`}).join("")||'<span class="mu">ยังไม่มีร้าน</span>'}</div>`;
+if(asub=="set")h+=setUI(false);
+return h;
 }
-function showSlip(id){const r=rentals.find(x=>x.id==id);if(r&&r.img)modal(`<img class="big" src="${esc(r.img)}"><button class="b s f" onclick="closeM()">ปิด</button>`)}
 async function decideRent(id,ok){try{await D("rentals/"+id).update({status:ok?"approved":"rejected"});await load();render();say(ok?"อนุมัติแล้ว":"ปฏิเสธแล้ว",1)}catch(e){say(ERR(e))}}
-function planAdmin(){
-return `<div class="c"><h3>เพิ่มแพ็กเกจเช่า</h3><select id="gt"><option value="basic">ธรรมดา</option><option value="v1">พรีเมียม V1</option><option value="v2">พรีเมียม V2</option></select><select id="gd">${[1,2,3,4,5,6].map(d=>`<option value="${d}">${d} วัน</option>`).join("")}</select><input id="gp" type="number" placeholder="ราคา (บาท)"><button class="b f" onclick="addPlan()">เพิ่มแพ็กเกจ</button></div><div class="c"><h3>แพ็กเกจทั้งหมด</h3>${plans.map(p=>`<div class="rw"><span>${TN[p.tier]} · ${p.days} วัน · ${p.price} บาท</span><button class="b d sm" onclick="delPlan('${p.id}')">ลบ</button></div>`).join("")||'<span class="mu">ยังไม่มี</span>'}</div><div class="c"><h3>บัญชีรับโอนค่าเช่า</h3><textarea id="mp" placeholder="ข้อมูลบัญชีรับโอน">${esc(site.pay||"")}</textarea><label class="mu">รูป QR</label><input id="mq" type="file" accept="image/*"><button class="b f" onclick="saveMainPay()">บันทึก</button></div>`;
-}
 async function addPlan(){
 const price=+$("#gp").value;if(!(price>0))return say("กรอกราคา");
 try{await C("plans").add({tier:$("#gt").value,days:+$("#gd").value,price});await load();render();say("เพิ่มแล้ว",1)}catch(e){say(ERR(e))}
 }
 async function delPlan(id){try{await D("plans/"+id).delete();await load();render()}catch(e){say(ERR(e))}}
-async function saveMainPay(){
-try{const d={...site,pay:$("#mp").value.trim()},q=$("#mq").files[0];if(q)d.qr=await pic(q,500);await D("settings/site").set(d);await load();render();say("บันทึกแล้ว",1)}catch(e){say(ERR(e))}
-}
-/* ตกแต่งร้านตามแพ็กเกจ */
-function appearUI(){
-const dis=n=>TIER>=n?"":"disabled",note=(n,t)=>TIER>=n?"":`<div class="mu">ต้องใช้แพ็กเกจ ${t} ขึ้นไป</div>`;
-return `<div class="c"><h3>ตกแต่งร้าน (พรีเมียม V1)</h3>${note(1,"พรีเมียม V1")}<label class="mu">โลโก้</label><input id="sl1" type="file" accept="image/*" ${dis(1)}><input id="sa1" placeholder="ข้อความแถบประกาศ" value="${esc(site.notice||"")}" ${dis(1)}><label class="mu">ฟอนต์</label><select id="sf1" ${dis(1)}>${["Noto Sans Thai","Prompt","Kanit","Sarabun"].map(f=>`<option ${site.font==f?"selected":""}>${f}</option>`).join("")}</select><label class="mu">ความโค้งมุม (px)</label><input id="sr1" type="number" min="0" max="24" value="${site.radius??10}" ${dis(1)}></div><div class="c"><h3>ตกแต่งร้าน (พรีเมียม V2)</h3>${note(2,"พรีเมียม V2")}<label class="mu">แบนเนอร์หน้าร้าน</label><input id="sb2" type="file" accept="image/*" ${dis(2)}><input id="sv2" placeholder="ลิงก์วิดีโอพื้นหลัง (.mp4)" value="${esc(site.bgVideo||"")}" ${dis(2)}></div>`;
-}
-function applyTheme(){
-const g=(k,lv)=>TIER>=lv?site[k]:undefined;
-let el=document.getElementById("thm");if(!el){el=document.createElement("style");el.id="thm";document.head.appendChild(el)}
-const f=g("font",1),rd=g("radius",1);let css="";
-if(f&&/^[A-Za-z ]+$/.test(f)){css+=`body{font-family:"${f}",system-ui,sans-serif}`;let l=document.getElementById("fl");if(!l){l=document.createElement("link");l.id="fl";l.rel="stylesheet";document.head.appendChild(l)}l.href="https://fonts.googleapis.com/css2?family="+f.replace(/ /g,"+")+":wght@400;500;600&display=swap"}
-if(rd!=null&&rd!=="")css+=`.c,.md,.ts{border-radius:${+rd+6}px}.b,input,textarea,select,.p .im{border-radius:${+rd}px}`;
-el.textContent=css;
-const v=g("bgVideo",2);let bv=document.getElementById("bgv");
-if(v){if(!bv){bv=document.createElement("video");bv.id="bgv";bv.muted=true;bv.loop=true;bv.autoplay=true;bv.playsInline=true;bv.style.cssText="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;opacity:.35";document.body.prepend(bv)}if(bv.dataset.s!==v){bv.src=v;bv.dataset.s=v;bv.play().catch(()=>{})}}else if(bv)bv.remove();
-}
-
-/* ===== แผงเจ้าของแพลตฟอร์ม (เว็บหลัก): ร้านเช่า ===== */
-const shopLink=id=>location.origin+location.pathname+"?shop="+id;
-function platUI(){
-return rentAdmin()+planAdmin()+`<div class="c"><h3>สร้างร้านให้ลูกค้าเช่า</h3><input id="ni" placeholder="รหัสร้าน (a-z 0-9 -) เช่น shop1" autocapitalize="none"><input id="nn" placeholder="ชื่อร้าน"><input id="np" placeholder="รหัสผ่านแอดมินของร้าน"><input id="nd" type="number" value="30" placeholder="จำนวนวันที่เช่า"><select id="nt"><option value="basic">ธรรมดา</option><option value="v1">พรีเมียม V1</option><option value="v2">พรีเมียม V2</option></select><button class="b f" onclick="newShop()">สร้างร้าน</button></div><div class="c"><h3>ร้านที่เช่า (${shops.length})</h3>${shops.map(s=>{const ex=s.exp&&s.exp<Date.now();return `<div class="rw" style="flex-wrap:wrap"><div style="min-width:0"><b>${esc(s.name||s.id)}</b> <span class="chip ${s.off||ex?"er":"ok"}">${s.off?"ระงับ":ex?"หมดอายุ":"ใช้งาน"}</span><div class="mu">หมดอายุ ${s.exp?fd(s.exp):"-"}</div><div class="mu" style="word-break:break-all;user-select:all">${esc(shopLink(s.id))}</div></div><span class="ac"><button class="b s sm" onclick="renew('${s.id}')">ต่อ 30 วัน</button><button class="b s sm" onclick="toggleShop('${s.id}',${!s.off})">${s.off?"เปิด":"ระงับ"}</button></span></div>`}).join("")||'<span class="mu">ยังไม่มีร้าน</span>'}</div><div class="c"><h3>ข้อความหน้าแรกเว็บหลัก</h3><textarea id="ct" placeholder="ราคาเช่า ช่องทางติดต่อ">${esc(site.contact||"")}</textarea><input id="mn" placeholder="ชื่อเว็บหลัก" value="${esc(site.name||"")}"><button class="b f" onclick="saveMain()">บันทึก</button></div>`;
-}
 async function newShop(){
 const id=$("#ni").value.trim().toLowerCase(),pw=$("#np").value,days=+$("#nd").value||30;
-if(!/^[a-z0-9-]{2,30}$/.test(id)||id==="main"||id==="www")return say("รหัสร้านไม่ถูกต้อง");
+if(!/^[a-z0-9-]{2,30}$/.test(id)||["main","www","admin"].includes(id))return say("ชื่อลิงก์ไม่ถูกต้อง");
 if(pw.length<4)return say("รหัสผ่านอย่างน้อย 4 ตัว");
-try{
-if((await R.doc("shops_meta/"+id).get()).exists)return say("รหัสร้านนี้ถูกใช้แล้ว");
-await mkShop(id,$("#nn").value.trim()||id,pw,days,$("#nt").value);
-await load();render();say("สร้างร้านแล้ว",1);
-}catch(e){say(ERR(e))}
+try{if((await R.doc("shops_meta/"+id).get()).exists)return say("ชื่อลิงก์นี้ถูกใช้แล้ว");
+await mkShop(id,$("#nn").value.trim()||id,pw,days,$("#nt").value);await load();render();say("สร้างร้านแล้ว",1)}catch(e){say(ERR(e))}
 }
 async function renew(id){
-try{const s=shops.find(x=>x.id==id),base=Math.max(Date.now(),s.exp||0);await R.doc("shops_meta/"+id).update({exp:base+30*864e5});await load();render();say("ต่ออายุแล้ว",1)}catch(e){say(ERR(e))}
+try{const s=shops.find(x=>x.id==id);await R.doc("shops_meta/"+id).update({exp:Math.max(Date.now(),s.exp||0)+30*864e5});await load();render();say("ต่ออายุแล้ว",1)}catch(e){say(ERR(e))}
 }
 async function toggleShop(id,off){try{await R.doc("shops_meta/"+id).update({off});await load();render()}catch(e){say(ERR(e))}}
-async function saveMain(){
-try{await D("settings/site").set({...site,contact:$("#ct").value.trim(),name:$("#mn").value.trim()});await load();render();say("บันทึกแล้ว",1)}catch(e){say(ERR(e))}
-}
 
-/* ===== ตั้งรหัสแอดมินครั้งแรก (เว็บหลัก) ===== */
+/* ตั้งรหัสแอดมินเว็บหลักครั้งแรก */
 function setupUI(){
-modal(`<h3 style="margin:0 0 6px">ตั้งรหัสผู้ดูแล</h3><div class="mu">ครั้งแรกที่เปิดเว็บ ตั้งรหัสผ่านผู้ดูแล (แยกจากบัญชีลูกค้า)</div><input id="sp1" type="password" placeholder="รหัสผ่าน (อย่างน้อย 8 ตัว)"><button class="b f" onclick="doSetup()">ตั้งรหัส</button>`);
+modal(`<h3 style="margin:0 0 6px">ตั้งรหัสผู้ดูแล</h3><div class="mu">ครั้งแรกที่เปิดเว็บ ตั้งรหัสผ่านสำหรับชื่อ admin แล้วเข้าสู่ระบบด้วยชื่อ admin ได้เลย</div><input id="sp1" type="password" placeholder="รหัสผ่าน (อย่างน้อย 8 ตัว)"><button class="b f" onclick="doSetup()">ตั้งรหัส</button>`);
 }
 async function doSetup(){
 const p=$("#sp1").value;if(p.length<8)return say("อย่างน้อย 8 ตัว");
-try{const salt=rs();await R.doc("admins/admin").set({hash:await sha(p,salt),salt});closeM();say("ตั้งรหัสแล้ว เข้าสู่ระบบผู้ดูแลได้เลย",1);admLogin()}catch(e){say(ERR(e))}
+try{const salt=rs();await R.doc("admins/admin").set({hash:await sha(p,salt),salt});closeM();say("ตั้งรหัสแล้ว เข้าสู่ระบบด้วยชื่อ admin ได้เลย",1);authUI(0)}catch(e){say(ERR(e))}
 }
 
 /* ===== เริ่มทำงาน ===== */
 (async()=>{
-if(!OK){$("#app").innerHTML='<div class="c"><h3>ยังเชื่อมฐานข้อมูลไม่ได้</h3><div class="mu">'+(CFG.projectId?"โหลด Firebase ไม่สำเร็จ ตรวจอินเทอร์เน็ตหรือเปิดไฟล์นี้จากเว็บโฮสต์ของคุณ":"ยังไม่ได้ใส่ค่า CFG ของ Firebase ในไฟล์ (ต้นสคริปต์)")+'</div></div>';return}
+if(!OK){$("#app").innerHTML='<div class="c"><h3>ยังเชื่อมฐานข้อมูลไม่ได้</h3><div class="mu">โหลด Firebase ไม่สำเร็จ ตรวจอินเทอร์เน็ตหรือค่า CFG</div></div>';return}
 try{
-if(SHOP!=="main"){
-const m=await R.doc("shops_meta/"+SHOP).get();
-TIER=m.exists?({basic:0,v1:1,v2:2})[m.data().tier]||0:0;
-if(!m.exists||m.data().off||(m.data().exp&&m.data().exp<Date.now())){
-$("#app").innerHTML='<div class="c" style="text-align:center;margin-top:60px"><h3>ร้านนี้ยังไม่เปิดใช้งานหรือหมดอายุ</h3><div class="mu">กรุณาติดต่อผู้ให้บริการ</div></div>';return;
+if(!MAIN){
+const m=await R.doc("shops_meta/"+SHOP).get(),d=m.exists?m.data():null;
+if(!d||d.off||(d.exp&&d.exp<Date.now())){
+$("#app").innerHTML='<div class="c" style="text-align:center;margin-top:60px"><h3>ร้านนี้ยังไม่เปิดใช้งานหรือหมดอายุ</h3><div class="mu">กรุณาติดต่อเจ้าของร้าน</div></div>';return;
 }
 }
-if(me){if(me.role==="admin"){if(!(await D("admins/"+me.u).get()).exists)me=null}else{const a=await D("accounts/"+me.u).get();if(!a.exists||a.data().banned)me=null;else me.role="user"}}
+if(me){
+if(isAdm()){if(!(await D("admins/admin").get()).exists)me=null}
+else{const a=await D("accounts/"+me.u).get();if(!a.exists||a.data().banned)me=null}
+}
 await load();render();
-if(SHOP==="main"&&!(await R.doc("admins/admin").get()).exists)setupUI();
-if(!me&&location.hash==="#admin")admLogin();
+if(MAIN&&!(await R.doc("admins/admin").get()).exists)setupUI();
 }catch(e){$("#app").innerHTML='<div class="c" style="color:var(--er)">โหลดไม่สำเร็จ: '+esc(ERR(e))+'<div class="mu">ตรวจค่า CFG ของ Firebase และ Firestore Rules</div></div>'}
 })();
 </script></body></html>
