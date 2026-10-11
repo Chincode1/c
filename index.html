@@ -570,4 +570,188 @@ if(site.pop&&!popShown){popShown=true;setTimeout(()=>{if(!$("#mo").innerHTML)mod
 if(MAIN&&!(await R.doc("admins/admin").get()).exists)setupUI();
 }catch(e){$("#app").innerHTML='<div class="c" style="color:var(--er)">โหลดไม่สำเร็จ: '+esc(ERR(e))+'<div class="mu">ตรวจค่า CFG ของ Firebase และ Firestore Rules</div></div>'}
 })();
-</script></body></html>
+</script>
+<!-- วางทั้งก้อนนี้ไว้ "ก่อน </body>" (ต่อจาก </script> ตัวเดิม) ใช้ได้ทั้งเว็บหลักและเว็บคนเช่า -->
+<script>
+(()=>{
+/* ---------- CSS ---------- */
+const st=document.createElement("style");st.textContent=`
+.w{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.spn{width:44px;height:44px;border-radius:50%;border:4px solid color-mix(in srgb,var(--ac) 22%,transparent);border-top-color:var(--ac);animation:spin .8s linear infinite;margin:60px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+#ld{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--bg) 55%,transparent);backdrop-filter:blur(3px)}#ld .spn{margin:0}
+#bn{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:space-around;padding:6px 4px calc(env(safe-area-inset-bottom,0px) + 6px);background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--bd)}
+#bn button{flex:1;max-width:110px;background:none;border:0;color:var(--mu);font:inherit;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;cursor:pointer}
+#bn button.on{color:var(--ac);font-weight:500}#bn img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+#bgv{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1}
+body.hv{background:transparent}.hv .c,.hv .md,.hv header,.hv .nb,.hv .dw{background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(6px)}
+.md:has(.fi){max-width:min(96vw,720px)}
+#cb{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);width:58px;height:58px;border-radius:50%;border:0;padding:0;z-index:49;background:var(--ac);color:var(--ac2);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;overflow:hidden}#cb img{width:100%;height:100%;object-fit:cover}
+#cp{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;max-width:720px;margin:0 auto}
+#cp .ch{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 12px;border-bottom:1px solid var(--bd)}#cp .ch b{flex:1}
+#cm{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.cbb{max-width:78%;align-self:flex-start;background:var(--bd);border-radius:14px;padding:8px 12px;word-break:break-word}.cbb.me{align-self:flex-end;background:var(--ac);color:var(--ac2)}
+.cbb img{max-width:100%;border-radius:10px;display:block;margin-bottom:4px}.cbb small{display:block;opacity:.6;font-size:10px;text-align:right}
+#cp .cr{display:flex;gap:8px;align-items:center;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 10px);border-top:1px solid var(--bd)}#cp .cr input{margin:0}
+.ct{display:flex;gap:12px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px}
+.ct button{flex:none;width:72px;background:none;border:0;color:var(--tx);font:inherit;font-size:13px;text-align:center;cursor:pointer;padding:0}
+.ct .ci2{width:68px;height:68px;border-radius:50%;background:var(--bd);display:flex;align-items:center;justify-content:center;margin:0 auto 4px;border:2px solid transparent;font-weight:600}.ct .on .ci2{border-color:var(--ac)}
+.ct.wd button{width:130px}.ct.wd .ci2{width:130px;height:72px;border-radius:12px}
+.av{width:88px;height:88px;border-radius:50%;object-fit:cover;background:var(--bd);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;margin:0 auto 10px}`;
+document.head.appendChild(st);
+ICO.user='<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>';
+ICO.chat='<path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-5.5A8 8 0 1 1 21 12z"/>';
+$("#app").innerHTML='<div class="spn"></div>';
+
+/* ---------- วงกลมหมุนตอนโหลด (โผล่เมื่อช้ากว่า 0.25 วิ) ---------- */
+let sn=0,stm=null;
+const sp=on=>{if(on){if(++sn==1)stm=setTimeout(()=>{if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}},250)}else if(--sn<=0){sn=0;clearTimeout(stm);$("#ld")?.remove()}};
+const _load=load;load=async function(){sp(1);try{await _load();if(me&&!isAdm()){try{const a=await D("accounts/"+me.u).get();if(a.exists){me.dn=a.data().dn;me.av=a.data().av}}catch(e){}}chkTop()}finally{sp(0)}};
+["buy","sendSlip","redeem","decide","saveProd","genKeys","sendRent","newShop","decideRent","doAuth","catPic"].forEach(n=>{const f=window[n];if(!f)return;window[n]=async function(...a){sp(1);try{return await f.apply(this,a)}finally{sp(0)}}});
+const _pic=pic;pic=(f,m,r)=>_pic(f,m===600?1000:m,r);
+
+/* ---------- ลูกค้ากลับมา แจ้งเงินเข้าแล้ว ---------- */
+function chkTop(){
+if(MAIN||!me||isAdm())return;
+let seen=null;try{seen=JSON.parse(LS.get("seenT")||"null")}catch(e){}
+const ap=tops.filter(t=>t.status=="approved"),ids=ap.map(t=>t.id);
+if(seen===null||lastTp){LS.set("seenT",JSON.stringify(ids));return}
+const nw=ap.filter(t=>!seen.includes(t.id));
+if(nw.length){LS.set("seenT",JSON.stringify(ids));setTimeout(()=>topDone(nw.reduce((s,t)=>s+t.amount,0)),500)}
+}
+
+/* ---------- วิดีโอพื้นหลังวนลูป ---------- */
+function bgv(){
+let v=$("#bgv");
+if(!/^https:\/\//.test(site.bgv||"")){v?.remove();document.body.classList.remove("hv");return}
+document.body.classList.add("hv");
+if(v&&v.dataset.s==site.bgv)return;v?.remove();
+v=document.createElement("video");v.id="bgv";v.dataset.s=site.bgv;v.src=site.bgv;v.autoplay=v.loop=v.muted=v.playsInline=true;v.setAttribute("muted","");
+document.body.prepend(v);v.play().catch(()=>{});
+}
+
+/* ---------- ฟอร์มตั้งค่าเพิ่ม ---------- */
+const _SCH=SCH;SCH=function(){const s=_SCH();
+s.look.push(["t","bgv","ลิงก์วิดีโอพื้นหลัง (.mp4 ขึ้นต้น https://)"]);
+s.brand.push(["f","noticeImg","รูปใต้แถบประกาศ (เต็มความกว้าง)",900],["f","popImg","รูปโฆษณาป๊อปอัป (เต็มความกว้าง)",900],["f","chatImg","รูปปุ่มแชท (วงกลม)",200,1]);
+return s};
+const _sf=saveForm;saveForm=async function(k){
+await _sf(k);
+if(k=="brand"&&!MAIN&&isAdm()){try{const m=await R.doc("shops_meta/"+SHOP).get(),d=m.data()||{};await R.doc("shops_meta/"+SHOP).update({name:site.name||SHOP});if(d.rid)await R.doc("rentals/"+d.rid).update({sname:site.name||SHOP})}catch(e){}}
+};
+const _sfn=saveForm;saveForm=async function(k){sp(1);try{return await _sfn(k)}finally{sp(0)}};
+
+/* ---------- รูปสลิป / โฆษณา 100% ---------- */
+showImg=function(id){const t=tops.find(x=>x.id==id)||rentals.find(x=>x.id==id);if(t&&t.img)modal(`<img class="fi" src="${esc(t.img)}" style="width:100%;height:auto;border-radius:10px;display:block"><button class="b s f" onclick="closeM()">ปิด</button>`)};
+const PI=()=>`<img class="pimg" src="${esc(site.popImg)}" style="width:100%;height:auto;border-radius:10px;display:block;margin-bottom:10px">`;
+new MutationObserver(()=>{const m=$("#mo .md>.msg:first-child");if(site.popImg&&m&&m.style.marginTop=="0px"&&!$("#mo .pimg"))m.insertAdjacentHTML("beforebegin",PI())}).observe($("#mo"),{childList:true,subtree:true});
+const _spl=splash;splash=function(t,f){_spl(t,f);if(!f&&site.popImg&&!site.pop&&!window.__pi){window.__pi=1;setTimeout(()=>{if(!$("#mo").innerHTML)modal(PI()+'<button class="b f" onclick="closeM()">ปิด</button>')},site.spOn===false?400:((+site.dur||2)*1000+800))}};
+
+/* ---------- บัญชี / โปรไฟล์ / เปลี่ยนรหัส ---------- */
+const initial=s=>esc((s||"?")[0].toUpperCase());
+function acctUI(){
+const a=isAdm();
+return (a?"":`<div class="c"><h3>โปรไฟล์</h3>${me.av?`<img class="av" src="${esc(me.av)}">`:`<div class="av">${initial(me.dn||me.u)}</div>`}<div class="mu" style="text-align:center">ชื่อผู้ใช้: ${esc(me.u)}</div><input id="pn" placeholder="ชื่อที่แสดง" value="${esc(me.dn||"")}"><label class="mu">รูปโปรไฟล์ (วงกลม)</label><input id="pf" type="file" accept="image/*"><label class="cl">ลบพื้นหลังรูปอัตโนมัติ<input type="checkbox" id="pr"></label><button class="b f" onclick="saveProfile()">บันทึกโปรไฟล์</button></div>`)
++`<div class="c"><h3>เปลี่ยนรหัสผ่าน${a?" (ผู้ดูแล)":""}</h3><input id="po" type="password" placeholder="รหัสผ่านเดิม"><input id="pw2" type="password" placeholder="รหัสผ่านใหม่"><button class="b f" onclick="changePw()">เปลี่ยนรหัสผ่าน</button></div><button class="b s f" onclick="logout()">ออกจากระบบ</button>`;
+}
+window.saveProfile=async function(){
+sp(1);try{
+const u={dn:$("#pn").value.trim()},f=$("#pf").files[0];
+if(f)u.av=await pic(f,200,$("#pr").checked);
+await D("accounts/"+me.u).update(u);me={...me,...u};LS.set("sess",JSON.stringify(me));render();say("บันทึกแล้ว",1);
+}catch(e){say(ERR(e))}finally{sp(0)}};
+window.changePw=async function(){
+const o=$("#po").value,n=$("#pw2").value,min=isAdm()?(MAIN?8:6):4;
+if(n.length<min)return say("รหัสผ่านใหม่อย่างน้อย "+min+" ตัว");
+sp(1);try{
+const ref=isAdm()?D("admins/admin"):D("accounts/"+me.u),d=(await ref.get()).data();
+if(d.hash!==await sha(o,d.salt))return say("รหัสผ่านเดิมไม่ถูกต้อง");
+const salt=rs();await ref.update({hash:await sha(n,salt),salt});
+if(isAdm()&&!MAIN){try{const m=(await R.doc("shops_meta/"+SHOP).get()).data()||{};if(m.rid)await R.doc("rentals/"+m.rid).update({spw:n,pwh:firebase.firestore.FieldValue.arrayUnion({p:n,at:Date.now()})})}catch(e){}}
+$("#po").value=$("#pw2").value="";say("เปลี่ยนรหัสผ่านแล้ว",1);
+}catch(e){say(ERR(e))}finally{sp(0)}};
+
+/* ---------- ผู้เช่า: ชื่อผู้ใช้ + รหัส + ประวัติรหัส (ซิงก์กับร้านจริง) ---------- */
+const _mk=makeShop;makeShop=async function(rid){
+const id=$("#ni")?.value.trim().toLowerCase(),nm2=$("#nn")?.value.trim(),pw=$("#np")?.value;
+sp(1);try{
+await _mk(rid);
+const r=rentals.find(x=>x.id==rid);
+if(r&&r.status=="done"&&r.shop==id){
+await D("rentals/"+rid).update({su:"admin",spw:pw,sname:nm2||id,pwh:[{p:pw,at:Date.now()}]});
+await R.doc("shops_meta/"+id).update({rid});await load();render();
+modal(`<h3 style="margin:0">เปิดร้านสำเร็จ</h3><div class="msg" style="user-select:all">ลิงก์: ${esc(shopLink(id))}\nชื่อผู้ใช้: admin\nรหัสผ่าน: ${esc(pw)}</div><button class="b f" onclick="closeM()">ปิด</button>`);
+}}catch(e){say(ERR(e))}finally{sp(0)}};
+const cred=r=>r.status=="done"?`<div class="mu" style="user-select:all;word-break:break-all">ร้าน: ${esc(r.sname||r.shop)}\nลิงก์: ${esc(shopLink(r.shop))}</div><div class="mu" style="user-select:all">ชื่อผู้ใช้: <b>${esc(r.su||"admin")}</b> · รหัสผ่าน: <b>${esc(r.spw||"-")}</b></div>${(r.pwh||[]).length>1?`<details class="mu"><summary>ประวัติรหัสผ่าน</summary>${r.pwh.slice().reverse().map(x=>`<div>${esc(x.p)} · ${fd(x.at)}</div>`).join("")}</details>`:""}`:"";
+mineUI=function(){return `<div class="c"><h3>การเช่าของฉัน</h3>${rentals.map(r=>`<div class="rw"><div style="min-width:0"><b>${TN[r.tier]} ${r.days} วัน</b> ${stChip(r.status)}<div class="mu">${fd(r.at)}</div>${cred(r)}</div>${r.status=="approved"?`<button class="b sm" onclick="shopForm('${r.id}')">ตั้งค่าร้านของคุณ</button>`:""}</div>`).join("")||'<span class="mu">ยังไม่มีรายการ</span>'}</div>`};
+rentUI=function(){return `<div class="c"><h3>คำสั่งเช่า</h3>${rentals.slice(0,60).map(r=>`<div class="rw"><div style="min-width:0"><b>${esc(r.u)}</b> · ${TN[r.tier]} ${r.days} วัน · ${r.price} บาท<div class="mu">${fd(r.at)}</div>${cred(r)}</div><span class="ac"><button class="b s sm" onclick="showImg('${r.id}')">สลิป</button>${r.status=="pending"?`<button class="b sm" onclick="decideRent('${r.id}',1)">อนุมัติ</button><button class="b d sm" onclick="decideRent('${r.id}',0)">ปฏิเสธ</button>`:stChip(r.status)}</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`};
+
+/* ---------- หมวดหมู่แบบมีรูป (วงกลม / แนวนอน) ---------- */
+shopUI=function(){
+const cs=cats(),wd=site.catShape=="wide"?"wd":"",img=site.catImg||{};
+const tile=(c,l)=>`<button class="${curCat==c?"on":""}" data-c="${esc(c)}" onclick="setCat(this.dataset.c)"><div class="ci2" style="${img[c]?`background:url('${esc(img[c])}') center/cover`:""}">${img[c]||!c?(!c&&!img[c]?"★":""):initial(l)}</div>${esc(l)}</button>`;
+return (site.banner?`<img src="${esc(site.banner)}" style="width:100%;border-radius:14px;margin-bottom:16px;display:block">`:"")+(cs.length?`<div class="ct ${wd}">${tile("","ทั้งหมด")}${cs.map(c=>tile(c,c)).join("")}</div>`:"")+`<input placeholder="ค้นหาสินค้า" value="${esc(qs)}" oninput="qs=this.value;$('#gr').innerHTML=grid();reveal()"><div id="gr">${grid()}</div>`};
+const _prod=prodUI;prodUI=function(){const img=site.catImg||{};return _prod()+`<div class="c"><h3>รูปหมวดหมู่</h3><label class="mu">รูปแบบ</label><select onchange="catShape(this.value)"><option value="round" ${site.catShape!="wide"?"selected":""}>วงกลม</option><option value="wide" ${site.catShape=="wide"?"selected":""}>แนวนอน</option></select>${cats().map(c=>`<div class="rw"><span style="display:flex;align-items:center;gap:8px">${img[c]?`<img src="${esc(img[c])}" style="width:40px;height:40px;border-radius:8px;object-fit:cover">`:""}<b>${esc(c)}</b></span><input type="file" accept="image/*" data-c="${esc(c)}" onchange="catPic(this)" style="width:auto;max-width:170px"></div>`).join("")||'<span class="mu">เพิ่มสินค้าพร้อมหมวดหมู่ก่อน</span>'}</div>`};
+window.catShape=async v=>{try{await D("settings/site").set({catShape:v},{merge:true});await load();render()}catch(e){say(ERR(e))}};
+window.catPic=async function(el){const f=el.files[0];if(!f)return;try{const d=await pic(f,site.catShape=="wide"?400:300,0);await D("settings/site").set({catImg:{...(site.catImg||{}),[el.dataset.c]:d}},{merge:true});await load();render();say("บันทึกรูปหมวดแล้ว",1)}catch(e){say(ERR(e))}};
+catPic=window.catPic;
+
+/* ---------- แชท (เว็บหลักคุยกับคนเช่า / ร้านคุยกับลูกค้า) ---------- */
+let cu=null,cun=null;
+function shell(title,inp,back){
+cun&&cun();cun=null;$("#cp")?.remove();
+const p=document.createElement("div");p.id="cp";
+p.innerHTML=`<div class="ch">${back?`<button class="ib" onclick="chatList()">←</button>`:""}<b>${esc(title)}</b><button class="ib" onclick="chatClose()">${ico("close")}</button></div><div id="cm"></div>${inp?`<div class="cr"><label class="ib" style="cursor:pointer">${ico("tag")}<input type="file" id="cf" accept="image/*" hidden></label><input id="ci" placeholder="พิมพ์ข้อความ"><button class="b sm" onclick="chatSend()">ส่ง</button></div>`:""}`;
+document.body.appendChild(p);
+}
+window.chatClose=()=>{cun&&cun();cun=null;$("#cp")?.remove()};
+const tm=t=>new Date(t).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+window.chatOpen=u=>{
+cu=u;shell(isAdm()?u:"แชทกับร้าน",1,isAdm());
+cun=C("chat").where("u","==",u).onSnapshot(s=>{
+const m=$("#cm");if(!m)return;
+m.innerHTML=s.docs.map(d=>d.data()).sort((a,b)=>a.at-b.at).map(x=>`<div class="cbb ${(x.from=="admin")==isAdm()?"me":""}">${x.img?`<img src="${esc(x.img)}">`:""}${x.t?`<div>${esc(x.t)}</div>`:""}<small>${tm(x.at)}</small></div>`).join("")||'<div class="mu" style="text-align:center">เริ่มคุยได้เลย</div>';
+m.scrollTop=m.scrollHeight},()=>{});
+};
+window.chatList=()=>{
+shell("แชทลูกค้า",0,0);
+cun=C("chat").onSnapshot(s=>{
+const m={};s.docs.forEach(d=>{const x=d.data();if(!m[x.u]||x.at>m[x.u].at)m[x.u]=x});
+const el=$("#cm");if(el)el.innerHTML=Object.values(m).sort((a,b)=>b.at-a.at).map(x=>`<button class="di" data-u="${esc(x.u)}" onclick="chatOpen(this.dataset.u)"><b>${esc(x.u)}</b><span class="mu">${esc((x.t||"[รูป]").slice(0,28))}</span></button>`).join("")||'<div class="mu" style="text-align:center">ยังไม่มีแชท</div>'},()=>{});
+};
+window.chatSend=async()=>{
+const t=$("#ci").value.trim(),f=$("#cf").files[0];if(!t&&!f)return;
+sp(1);try{
+const d={u:cu,from:isAdm()?"admin":"user",t,at:Date.now()};
+if(f)d.img=await pic(f,600);
+await C("chat").add(d);$("#ci").value="";$("#cf").value="";
+}catch(e){say(ERR(e))}finally{sp(0)}};
+function chatBtn(){
+let b=$("#cb");
+if(!b){b=document.createElement("button");b.id="cb";b.setAttribute("aria-label","แชท");b.onclick=()=>{if(!me){authUI(0);return say("เข้าสู่ระบบก่อนแชท")}isAdm()?chatList():chatOpen(me.u)};document.body.appendChild(b)}
+const k=site.chatImg||"";if(b.dataset.k!==k){b.dataset.k=k;b.innerHTML=k?`<img src="${esc(k)}">`:ico("chat")}
+}
+
+/* ---------- เมนูลัดด้านล่าง + เมนูบัญชี ---------- */
+function bar(){
+let b=$("#bn");if(!b){b=document.createElement("nav");b.id="bn";document.body.appendChild(b)}
+const a=isAdm(),L=MAIN?(a?[["a_rent","คำสั่งเช่า","doc"],["a_plan","แพ็กเกจ","tag"],["a_shops","ร้าน","shop"]]:[["plans","แพ็กเกจ","tag"],["mine","การเช่า","doc"]]):(a?[["a_dash","สรุป","chart"],["a_prod","สินค้า","box"],["a_top","โอน","bolt"]]:[["shop","สินค้า","shop"],["top","เติมเงิน","bolt"],["his","ประวัติ","doc"]]);
+L.push(["acct","บัญชี","user"]);
+b.innerHTML=`<button onclick="menuOpen()">${ico("menu")}<span>เมนู</span></button>`+L.map(([k,l,i])=>`<button class="${tab==k?"on":""}" onclick="goT('${k}')">${k=="acct"&&me&&me.av?`<img src="${esc(me.av)}">`:ico(i)}<span>${l}</span></button>`).join("");
+}
+const _NAV=NAV;NAV=function(){const G=_NAV();if(me)G.push(["บัญชี",[["acct","บัญชี / โปรไฟล์ / รหัสผ่าน","user"]]]);return G};
+const _goT=goT;goT=function(k){if(k=="acct"&&!me){closeM();authUI(0);return say("เข้าสู่ระบบก่อน")}_goT(k)};
+const _r=render;render=function(){
+_r();
+if(tab=="acct"&&me){[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb"))e.remove()});$("#app").insertAdjacentHTML("beforeend",`<h3 class="ph">บัญชีของฉัน</h3>`+acctUI())}
+const h=$("#app header");
+if(h&&site.noticeImg&&tab!="acct")h.insertAdjacentHTML("afterend",`<img src="${esc(site.noticeImg)}" style="width:100%;height:auto;border-radius:12px;margin-bottom:14px;display:block">`);
+bgv();bar();chatBtn();
+};
+const _lw=logout;logout=function(){chatClose();_lw()};
+})();
+</script>
+
+
+
+</body></html>
