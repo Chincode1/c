@@ -2,6 +2,18 @@
 <html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ร้านค้า</title>
+<script>
+/* ตัวแสดง error บนหน้าจอ (ถ้ามีบั๊ก จะเห็นกล่องแดงด้านบน แตะเพื่อปิด) */
+window.showErr=function(m){
+try{
+var d=document.getElementById("errbar");
+if(!d){d=document.createElement("div");d.id="errbar";d.style.cssText="position:fixed;left:8px;right:8px;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:9999;background:#c62828;color:#fff;padding:10px 12px;border-radius:10px;font:12px/1.4 system-ui;word-break:break-all;box-shadow:0 6px 20px rgba(0,0,0,.35)";d.onclick=function(){d.remove()};(document.body||document.documentElement).appendChild(d)}
+d.textContent="บั๊ก: "+m+" (แตะเพื่อปิด · แคปให้ผู้ช่วยดู)";
+}catch(e){}
+};
+addEventListener("error",function(e){showErr((e.message||"error")+" @บรรทัด "+(e.lineno||"?"))});
+addEventListener("unhandledrejection",function(e){showErr((e.reason&&e.reason.message)||String(e.reason))});
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -69,7 +81,7 @@ input[type=checkbox]{width:20px;height:20px;margin:0;padding:0}input[type=range]
 /* แอนิเมชัน */
 .rv{opacity:0}.rv.in{opacity:1;animation:bin .6s cubic-bezier(.2,1.3,.4,1) backwards;animation-delay:var(--d,0s)}
 @keyframes bin{from{opacity:0;transform:translateY(28px) scale(.92)}}
-.sp{position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--tx);display:flex;align-items:center;justify-content:center;transition:opacity .6s,visibility .6s}.sp.hide{opacity:0;visibility:hidden}
+.sp{position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--tx);display:flex;align-items:center;justify-content:center;transition:opacity .6s,visibility .6s}.sp.hide{opacity:0;visibility:hidden;pointer-events:none}
 .si{text-align:center;padding:20px}.sp.zoom .si{animation:szoom .9s ease both}.sp.slide .si{animation:sslide .9s ease both}.sp.fade .si{animation:sfade 1.1s ease both}
 .si img{max-height:90px;max-width:220px;object-fit:contain;display:block;margin:0 auto 10px}.si .nm{font-size:28px;font-weight:600;letter-spacing:.06em}.si .tg{margin-top:8px;opacity:.6;font-size:14px;letter-spacing:.1em}
 .sb2{width:120px;height:2px;margin:26px auto 0;overflow:hidden;border-radius:2px;background:color-mix(in srgb,currentColor 15%,transparent)}.sb2 u{display:block;height:100%;background:currentColor;transform-origin:left;animation:sload linear both}
@@ -213,7 +225,7 @@ LS.set("sess",JSON.stringify(me));closeM();await load();liveWallet();render();sa
 }
 function logout(){if(unW){unW();unW=null}me=null;wal={credits:0,orders:[]};LS.set("sess","");tab="";closeM();render()}
 
-/* ===== เมนู 3 ขีด (จัดกลุ่มหมวดเดียวกันไว้ด้วยกัน) ===== */
+/* ===== เมนู 3 ขีด (รูปแบบข้อมูล: [ชื่อหมวด, [ [รหัส,ชื่อ,ไอคอน,เลขแจ้ง], ... ]] ) ===== */
 function NAV(){
 const pt=tops.filter(t=>t.status=="pending").length||"",pr=rentals.filter(r=>r.status=="pending").length||"";
 if(MAIN){
@@ -272,9 +284,9 @@ document.body.appendChild(f);setTimeout(()=>f.remove(),3500);
 }
 function splash(t=site,force){
 if(!force&&t.spOn===false)return;
-$("#sp1")?.remove();
+$("#spl")?.remove();
 const d=(+t.dur||2)*1000,e=document.createElement("div");
-e.id="sp1";e.className="sp "+(["zoom","slide","fade"].includes(t.sty)?t.sty:"zoom");
+e.id="spl";e.className="sp "+(["zoom","slide","fade"].includes(t.sty)?t.sty:"zoom");
 e.innerHTML=`<div class="si">${t.logo?`<img src="${esc(t.logo)}">`:""}<div class="nm">${esc(t.name||nm())}</div><div class="tg">${esc(t.tag||"")}</div><div class="sb2"><u style="animation-duration:${d}ms"></u></div></div>`;
 document.body.appendChild(e);
 setTimeout(()=>{e.classList.add("hide");setTimeout(()=>e.remove(),700)},d);
@@ -390,7 +402,7 @@ function topUI(){
 return `<div class="c"><h3>เติมเงินด้วยสลิป</h3>${site.qr||site.pay?`${site.qr?`<img src="${esc(site.qr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:10px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.pay||"")}</div><input id="ta" type="number" min="1" placeholder="จำนวนเงินที่โอน (บาท)"><input id="ts" type="file" accept="image/*"><button class="b f" id="tb" onclick="sendSlip()">แจ้งโอน</button>`:'<div class="mu">ร้านนี้ยังไม่เปิดเติมเงินด้วยสลิป</div>'}</div><div class="c"><h3>ใส่คีย์เติมเงิน</h3><input id="k" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters"><button class="b f" onclick="redeem()">ยืนยัน</button></div>${tops.length?`<div class="c"><h3>ประวัติแจ้งโอน</h3>${tops.map(t=>`<div class="rw"><span>${t.amount} บาท<div class="mu">${fd(t.at)}</div></span>${stChip(t.status)}</div>`).join("")}</div>`:""}`;
 }
 const SN={pending:["รอตรวจสอบ",""],approved:["อนุมัติแล้ว","ok"],rejected:["ไม่อนุมัติ","er"],done:["เปิดร้านแล้ว","ok"]};
-const stChip=s=>`<span class="chip ${SN[s][1]}">${SN[s][0]}</span>`;
+const stChip=s=>`<span class="chip ${(SN[s]||["",""])[1]}">${(SN[s]||[s,""])[0]}</span>`;
 async function sendSlip(){
 const a=+($("#ta").value||0),f=$("#ts").files[0];
 if(!(a>0))return say("กรอกจำนวนเงิน");if(!f)return say("แนบสลิป");
@@ -544,10 +556,10 @@ try{const s=shops.find(x=>x.id==id);await R.doc("shops_meta/"+id).update({exp:Ma
 }
 async function toggleShop(id,off){try{await R.doc("shops_meta/"+id).update({off});await load();render()}catch(e){say(ERR(e))}}
 function setupUI(){
-modal(`<h3 style="margin:0 0 6px">ตั้งรหัสผู้ดูแล</h3><div class="mu">ครั้งแรกที่เปิดเว็บ ตั้งรหัสผ่านสำหรับชื่อ admin แล้วเข้าสู่ระบบด้วยชื่อ admin ได้เลย</div><input id="sp1" type="password" placeholder="รหัสผ่าน (อย่างน้อย 8 ตัว)"><button class="b f" onclick="doSetup()">ตั้งรหัส</button>`);
+modal(`<h3 style="margin:0 0 6px">ตั้งรหัสผู้ดูแล</h3><div class="mu">ครั้งแรกที่เปิดเว็บ ตั้งรหัสผ่านสำหรับชื่อ admin แล้วเข้าสู่ระบบด้วยชื่อ admin ได้เลย</div><input id="spw" type="password" placeholder="รหัสผ่าน (อย่างน้อย 8 ตัว)"><button class="b f" onclick="doSetup()">ตั้งรหัส</button>`);
 }
 async function doSetup(){
-const p=$("#sp1").value;if(p.length<8)return say("อย่างน้อย 8 ตัว");
+const p=$("#spw").value;if(p.length<8)return say("อย่างน้อย 8 ตัว");
 try{const salt=rs();await R.doc("admins/admin").set({hash:await sha(p,salt),salt});say("ตั้งรหัสแล้ว เข้าสู่ระบบด้วยชื่อ admin ได้เลย",1);authUI(0)}catch(e){say(ERR(e))}
 }
 
@@ -571,10 +583,10 @@ if(MAIN&&!(await R.doc("admins/admin").get()).exists)setupUI();
 }catch(e){$("#app").innerHTML='<div class="c" style="color:var(--er)">โหลดไม่สำเร็จ: '+esc(ERR(e))+'<div class="mu">ตรวจค่า CFG ของ Firebase และ Firestore Rules</div></div>'}
 })();
 </script>
-<!-- วางทั้งก้อนนี้ไว้ "ก่อน </body>" (ต่อจาก </script> ตัวเดิม) ใช้ได้ทั้งเว็บหลักและเว็บคนเช่า -->
+
+<!-- ===== ADDON 1: โหลด/แชท/โปรไฟล์/หมวดหมู่รูป/เมนูล่าง ===== -->
 <script>
 (()=>{
-/* ---------- CSS ---------- */
 const st=document.createElement("style");st.textContent=`
 .w{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 .spn{width:44px;height:44px;border-radius:50%;border:4px solid color-mix(in srgb,var(--ac) 22%,transparent);border-top-color:var(--ac);animation:spin .8s linear infinite;margin:60px auto}
@@ -603,14 +615,14 @@ ICO.user='<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>';
 ICO.chat='<path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-5.5A8 8 0 1 1 21 12z"/>';
 $("#app").innerHTML='<div class="spn"></div>';
 
-/* ---------- วงกลมหมุนตอนโหลด (โผล่เมื่อช้ากว่า 0.25 วิ) ---------- */
+/* วงกลมหมุนตอนโหลด (โผล่เมื่อช้ากว่า 0.25 วิ) */
 let sn=0,stm=null;
 const sp=on=>{if(on){if(++sn==1)stm=setTimeout(()=>{if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}},250)}else if(--sn<=0){sn=0;clearTimeout(stm);$("#ld")?.remove()}};
 const _load=load;load=async function(){sp(1);try{await _load();if(me&&!isAdm()){try{const a=await D("accounts/"+me.u).get();if(a.exists){me.dn=a.data().dn;me.av=a.data().av}}catch(e){}}chkTop()}finally{sp(0)}};
 ["buy","sendSlip","redeem","decide","saveProd","genKeys","sendRent","newShop","decideRent","doAuth","catPic"].forEach(n=>{const f=window[n];if(!f)return;window[n]=async function(...a){sp(1);try{return await f.apply(this,a)}finally{sp(0)}}});
 const _pic=pic;pic=(f,m,r)=>_pic(f,m===600?1000:m,r);
 
-/* ---------- ลูกค้ากลับมา แจ้งเงินเข้าแล้ว ---------- */
+/* ลูกค้ากลับมา แจ้งเงินเข้าแล้ว */
 function chkTop(){
 if(MAIN||!me||isAdm())return;
 let seen=null;try{seen=JSON.parse(LS.get("seenT")||"null")}catch(e){}
@@ -620,17 +632,17 @@ const nw=ap.filter(t=>!seen.includes(t.id));
 if(nw.length){LS.set("seenT",JSON.stringify(ids));setTimeout(()=>topDone(nw.reduce((s,t)=>s+t.amount,0)),500)}
 }
 
-/* ---------- วิดีโอพื้นหลังวนลูป ---------- */
+/* วิดีโอพื้นหลังวนลูป (ลิงก์) */
 function bgv(){
 let v=$("#bgv");
-if(!/^https:\/\//.test(site.bgv||"")){v?.remove();document.body.classList.remove("hv");return}
+if(!/^https:\/\//.test(site.bgv||"")){v?.remove();if(!site.bgvN)document.body.classList.remove("hv");return}
 document.body.classList.add("hv");
 if(v&&v.dataset.s==site.bgv)return;v?.remove();
 v=document.createElement("video");v.id="bgv";v.dataset.s=site.bgv;v.src=site.bgv;v.autoplay=v.loop=v.muted=v.playsInline=true;v.setAttribute("muted","");
 document.body.prepend(v);v.play().catch(()=>{});
 }
 
-/* ---------- ฟอร์มตั้งค่าเพิ่ม ---------- */
+/* ฟอร์มตั้งค่าเพิ่ม */
 const _SCH=SCH;SCH=function(){const s=_SCH();
 s.look.push(["t","bgv","ลิงก์วิดีโอพื้นหลัง (.mp4 ขึ้นต้น https://)"]);
 s.brand.push(["f","noticeImg","รูปใต้แถบประกาศ (เต็มความกว้าง)",900],["f","popImg","รูปโฆษณาป๊อปอัป (เต็มความกว้าง)",900],["f","chatImg","รูปปุ่มแชท (วงกลม)",200,1]);
@@ -641,13 +653,13 @@ if(k=="brand"&&!MAIN&&isAdm()){try{const m=await R.doc("shops_meta/"+SHOP).get()
 };
 const _sfn=saveForm;saveForm=async function(k){sp(1);try{return await _sfn(k)}finally{sp(0)}};
 
-/* ---------- รูปสลิป / โฆษณา 100% ---------- */
+/* รูปสลิป / โฆษณา 100% */
 showImg=function(id){const t=tops.find(x=>x.id==id)||rentals.find(x=>x.id==id);if(t&&t.img)modal(`<img class="fi" src="${esc(t.img)}" style="width:100%;height:auto;border-radius:10px;display:block"><button class="b s f" onclick="closeM()">ปิด</button>`)};
 const PI=()=>`<img class="pimg" src="${esc(site.popImg)}" style="width:100%;height:auto;border-radius:10px;display:block;margin-bottom:10px">`;
 new MutationObserver(()=>{const m=$("#mo .md>.msg:first-child");if(site.popImg&&m&&m.style.marginTop=="0px"&&!$("#mo .pimg"))m.insertAdjacentHTML("beforebegin",PI())}).observe($("#mo"),{childList:true,subtree:true});
 const _spl=splash;splash=function(t,f){_spl(t,f);if(!f&&site.popImg&&!site.pop&&!window.__pi){window.__pi=1;setTimeout(()=>{if(!$("#mo").innerHTML)modal(PI()+'<button class="b f" onclick="closeM()">ปิด</button>')},site.spOn===false?400:((+site.dur||2)*1000+800))}};
 
-/* ---------- บัญชี / โปรไฟล์ / เปลี่ยนรหัส ---------- */
+/* บัญชี / โปรไฟล์ / เปลี่ยนรหัส */
 const initial=s=>esc((s||"?")[0].toUpperCase());
 function acctUI(){
 const a=isAdm();
@@ -671,7 +683,7 @@ if(isAdm()&&!MAIN){try{const m=(await R.doc("shops_meta/"+SHOP).get()).data()||{
 $("#po").value=$("#pw2").value="";say("เปลี่ยนรหัสผ่านแล้ว",1);
 }catch(e){say(ERR(e))}finally{sp(0)}};
 
-/* ---------- ผู้เช่า: ชื่อผู้ใช้ + รหัส + ประวัติรหัส (ซิงก์กับร้านจริง) ---------- */
+/* ผู้เช่า: ชื่อผู้ใช้ + รหัส + ประวัติรหัส */
 const _mk=makeShop;makeShop=async function(rid){
 const id=$("#ni")?.value.trim().toLowerCase(),nm2=$("#nn")?.value.trim(),pw=$("#np")?.value;
 sp(1);try{
@@ -686,7 +698,7 @@ const cred=r=>r.status=="done"?`<div class="mu" style="user-select:all;word-brea
 mineUI=function(){return `<div class="c"><h3>การเช่าของฉัน</h3>${rentals.map(r=>`<div class="rw"><div style="min-width:0"><b>${TN[r.tier]} ${r.days} วัน</b> ${stChip(r.status)}<div class="mu">${fd(r.at)}</div>${cred(r)}</div>${r.status=="approved"?`<button class="b sm" onclick="shopForm('${r.id}')">ตั้งค่าร้านของคุณ</button>`:""}</div>`).join("")||'<span class="mu">ยังไม่มีรายการ</span>'}</div>`};
 rentUI=function(){return `<div class="c"><h3>คำสั่งเช่า</h3>${rentals.slice(0,60).map(r=>`<div class="rw"><div style="min-width:0"><b>${esc(r.u)}</b> · ${TN[r.tier]} ${r.days} วัน · ${r.price} บาท<div class="mu">${fd(r.at)}</div>${cred(r)}</div><span class="ac"><button class="b s sm" onclick="showImg('${r.id}')">สลิป</button>${r.status=="pending"?`<button class="b sm" onclick="decideRent('${r.id}',1)">อนุมัติ</button><button class="b d sm" onclick="decideRent('${r.id}',0)">ปฏิเสธ</button>`:stChip(r.status)}</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`};
 
-/* ---------- หมวดหมู่แบบมีรูป (วงกลม / แนวนอน) ---------- */
+/* หมวดหมู่แบบมีรูป (วงกลม / แนวนอน) */
 shopUI=function(){
 const cs=cats(),wd=site.catShape=="wide"?"wd":"",img=site.catImg||{};
 const tile=(c,l)=>`<button class="${curCat==c?"on":""}" data-c="${esc(c)}" onclick="setCat(this.dataset.c)"><div class="ci2" style="${img[c]?`background:url('${esc(img[c])}') center/cover`:""}">${img[c]||!c?(!c&&!img[c]?"★":""):initial(l)}</div>${esc(l)}</button>`;
@@ -696,7 +708,7 @@ window.catShape=async v=>{try{await D("settings/site").set({catShape:v},{merge:t
 window.catPic=async function(el){const f=el.files[0];if(!f)return;try{const d=await pic(f,site.catShape=="wide"?400:300,0);await D("settings/site").set({catImg:{...(site.catImg||{}),[el.dataset.c]:d}},{merge:true});await load();render();say("บันทึกรูปหมวดแล้ว",1)}catch(e){say(ERR(e))}};
 catPic=window.catPic;
 
-/* ---------- แชท (เว็บหลักคุยกับคนเช่า / ร้านคุยกับลูกค้า) ---------- */
+/* แชท */
 let cu=null,cun=null;
 function shell(title,inp,back){
 cun&&cun();cun=null;$("#cp")?.remove();
@@ -732,7 +744,7 @@ if(!b){b=document.createElement("button");b.id="cb";b.setAttribute("aria-label",
 const k=site.chatImg||"";if(b.dataset.k!==k){b.dataset.k=k;b.innerHTML=k?`<img src="${esc(k)}">`:ico("chat")}
 }
 
-/* ---------- เมนูลัดด้านล่าง + เมนูบัญชี ---------- */
+/* เมนูลัดด้านล่าง (แบบเดิม จะถูกแทนด้วย bar2 ใน addon 2) + เมนูบัญชี */
 function bar(){
 let b=$("#bn");if(!b){b=document.createElement("nav");b.id="bn";document.body.appendChild(b)}
 const a=isAdm(),L=MAIN?(a?[["a_rent","คำสั่งเช่า","doc"],["a_plan","แพ็กเกจ","tag"],["a_shops","ร้าน","shop"]]:[["plans","แพ็กเกจ","tag"],["mine","การเช่า","doc"]]):(a?[["a_dash","สรุป","chart"],["a_prod","สินค้า","box"],["a_top","โอน","bolt"]]:[["shop","สินค้า","shop"],["top","เติมเงิน","bolt"],["his","ประวัติ","doc"]]);
@@ -752,7 +764,7 @@ const _lw=logout;logout=function(){chatClose();_lw()};
 })();
 </script>
 
-  <!-- วางไฟล์นี้ต่อจาก addon.html (ก่อน </body>) -->
+<!-- ===== ADDON 2: เมนูลัดล่างปุ่มกลาง / วิดีโอพื้นหลังอัปโหลด / หน้า "ปรับแต่งทั้งหมด" ===== -->
 <script>
 (()=>{
 const st=document.createElement("style");st.textContent=`
@@ -771,7 +783,6 @@ const S=o=>D("settings/site").set(o,{merge:true});
 const done=async m=>{await load();render();say(m||"บันทึกแล้ว",1)};
 const run=async(f,m)=>{busy2(1);try{await f();await done(m)}catch(e){say(ERR(e))}finally{busy2(0)}};
 
-/* ---------- เมนูลัดล่าง: เติมเงินอยู่กลาง สีเข้ม ---------- */
 function bar2(){
 if(site.bnOn===false){$("#bn")?.remove();document.body.classList.add("nbn");return}
 document.body.classList.remove("nbn");
@@ -786,7 +797,7 @@ b.innerHTML=`<button onclick="menuOpen()">${ico("menu")}<span>เมนู</span
 }
 window.cGo=()=>{if(!me){authUI(0);return say("เข้าสู่ระบบก่อนแชท")}isAdm()?chatList():chatOpen(me.u)};
 
-/* ---------- วิดีโอพื้นหลังที่อัปโหลดเอง (แบ่งเก็บเป็นชิ้นใน Firestore) ---------- */
+/* วิดีโอพื้นหลังที่อัปโหลดเอง (แบ่งเก็บเป็นชิ้นใน Firestore) */
 async function vid(){
 if(!site.bgvN){$("#bgv2")?.remove();return}
 document.body.classList.add("hv");
@@ -811,38 +822,33 @@ await S({bgvN:n,bgvAt:Date.now()});window.__vk=null;
 };
 window.cuVidDel=()=>run(async()=>{await D("settings/site").update({bgvN:FV().delete(),bgvAt:FV().delete(),bgv:FV().delete()});$("#bgv2")?.remove();window.__vk=null},"ลบวิดีโอแล้ว");
 
-/* ---------- หน้า "ปรับแต่งทั้งหมด" (แอดมิน) ---------- */
+/* การ์ดตั้งค่าต่างๆ (หน้า "ปรับแต่ง" จะถูกแยกเป็นหน้าย่อยในบล็อกสุดท้าย) */
 window.cuSet=(k,v)=>run(()=>S({[k]:v}));
 window.cuUp=async(k,max,el)=>{const f=el.files[0];if(!f)return;run(async()=>S({[k]:await pic(f,max,$("#rm_"+k)?.checked)}),"อัปโหลดรูปแล้ว")};
 window.cuDel=k=>run(()=>D("settings/site").update({[k]:FV().delete()}),"ลบแล้ว");
 const blk=(t,d,b)=>`<div class="c cu"><h3>${t}</h3><div class="mu" style="margin-bottom:8px">${d}</div>${b}</div>`;
 const img=(k,max,rm)=>(site[k]?`<img class="pv" src="${esc(site[k])}">`:'<div class="mu">ยังไม่มีรูป</div>')+(rm?`<label class="cl">ลบพื้นหลังรูปอัตโนมัติ<input type="checkbox" id="rm_${k}" checked></label>`:"")+`<input type="file" accept="image/*" onchange="cuUp('${k}',${max},this)">`+(site[k]?`<button class="b d sm" onclick="cuDel('${k}')">ลบรูปนี้</button>`:"");
 function custUI(){
-const ci=site.catImg||{},wide=site.catShape=="wide";
 return blk("เมนูลัดด้านล่าง","ปุ่มกลางเป็นปุ่มหลัก (เติมเงิน / สินค้า / แพ็กเกจ)",`<label class="cl">แสดงเมนูลัด<input type="checkbox" ${site.bnOn===false?"":"checked"} onchange="cuSet('bnOn',this.checked)"></label><label class="mu">สีปุ่มกลาง</label><input type="color" value="${hx(site.bnc,hx(site.ac,"#0f766e"))}" onchange="cuSet('bnc',this.value)">`)
 +blk("วิดีโอพื้นหลัง (เล่นวนซ้ำ)","อัปโหลดไฟล์ได้ไม่เกิน 2.5MB หรือวางลิงก์ .mp4",`<div class="mu">${site.bgvN?"มีวิดีโอที่อัปโหลดอยู่แล้ว":site.bgv?"ใช้ลิงก์อยู่":"ยังไม่มีวิดีโอ"}</div><input type="file" accept="video/*" onchange="cuVid(this)"><input placeholder="หรือลิงก์ https://....mp4" value="${esc(site.bgv||"")}" onchange="cuSet('bgv',this.value.trim())">${site.bgvN||site.bgv?`<button class="b d sm" onclick="cuVidDel()">ลบวิดีโอ</button>`:""}`)
 +blk("ข้อความ + รูปประกาศ","ข้อความวิ่งด้านบน และรูปเต็มความกว้างใต้หัวเว็บ",`<input placeholder="ข้อความประกาศวิ่ง" value="${esc(site.notice||"")}" onchange="cuSet('notice',this.value.trim())">${img("noticeImg",900)}`)
 +blk("โฆษณา (ป๊อปอัปตอนเข้าเว็บ)","รูปจะแสดงเต็ม 100% ของกล่อง",`<textarea placeholder="ข้อความโฆษณา (ไม่ใส่ก็ได้)" onchange="cuSet('pop',this.value.trim())">${esc(site.pop||"")}</textarea>${img("popImg",900)}`)
-+blk("ปุ่มแชทลอย (วงกลม)","รูปจะถูกตัดเป็นวงกลม",img("chatImg",200,1))
-+(MAIN?"":blk("หมวดหมู่สินค้า","เลือกรูปแบบและใส่รูปให้แต่ละหมวด (หมวดมาจากช่องหมวดหมู่ตอนเพิ่มสินค้า)",`<select onchange="catShape(this.value)"><option value="round" ${wide?"":"selected"}>รูปวงกลม</option><option value="wide" ${wide?"selected":""}>รูปแนวนอน</option></select>${cats().map(c=>`<div class="rw"><span style="display:flex;align-items:center;gap:8px">${ci[c]?`<img src="${esc(ci[c])}" style="width:44px;height:44px;border-radius:${wide?"8px":"50%"};object-fit:cover">`:""}<b>${esc(c)}</b></span><input type="file" accept="image/*" data-c="${esc(c)}" onchange="catPic(this)" style="width:auto;max-width:170px"></div>`).join("")||'<span class="mu">ยังไม่มีหมวด ไปเพิ่มสินค้าแล้วใส่หมวดหมู่ก่อน</span>'}`))
-+`<div class="mu" style="text-align:center">ตั้งค่าสี / ฟอนต์ / การ์ด / แอนิเมชัน อยู่ในเมนู "หน้าตาเว็บ" เหมือนเดิม</div>`;
++blk("ปุ่มแชทลอย (วงกลม)","รูปจะถูกตัดเป็นวงกลม",img("chatImg",200,1));
 }
-const _NAV=NAV;NAV=function(){const G=_NAV();if(isAdm())G.splice(1,0,["ปรับแต่งเว็บ",[["a_cust","ปรับแต่งทั้งหมด (วิดีโอ/รูป/แชท/หมวด)","wand"]]]);return G};
 const _r=render;render=function(){
 _r();
-if(tab=="a_cust"&&isAdm()){[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb"))e.remove()});$("#app").insertAdjacentHTML("beforeend",`<h3 class="ph">ปรับแต่งทั้งหมด</h3>`+custUI())}
+if(tab=="a_cust"&&isAdm()){[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb")&&e.id!="nbv")e.remove()});$("#app").insertAdjacentHTML("beforeend",`<h3 class="ph">ปรับแต่งทั้งหมด</h3>`+custUI())}
 bar2();vid();
 };
-render();
 })();
 </script>
 
-  <style>
+<style>
 #cb:not([data-k=""]){background:transparent;box-shadow:none;overflow:visible}
 #cb:not([data-k=""]) img{object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
 </style>
 
-  <!-- วางต่อจาก addon2.html (ก่อน </body>) : เพิ่มปุ่ม "ลบพื้นหลัง" ให้ทุกช่องอัปโหลดรูป -->
+<!-- ===== ADDON 3: ปุ่ม "ลบพื้นหลัง" ให้ทุกช่องอัปโหลดรูป ===== -->
 <script>
 (()=>{
 window.__rmx=false;
@@ -869,7 +875,7 @@ return _p(f,on?Math.min(m,600):m,on?true:r);
 })();
 </script>
 
-  <style>
+<style>
 .hv .c,.hv header,.hv .nb,.hv #bn{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .hv select,.hv input,.hv textarea{background:transparent!important}
 .hv .c,.hv header,.hv #bn{border-color:rgba(255,255,255,.35)}
@@ -877,9 +883,10 @@ return _p(f,on?Math.min(m,600):m,on?true:r);
 .hv .b{text-shadow:none}
 </style>
 <script>
-addEventListener("pointerdown",()=>{document.querySelectorAll("#bgv,#bgv2").forEach(v=>v.play().catch(()=>{}))},{once:true});
+addEventListener("pointerdown",()=>{document.querySelectorAll("#bgv,#bgv2,#nbv video").forEach(v=>v.play().catch(()=>{}))},{once:true});
 </script>
-<!-- วางต่อท้ายสุด (หลัง addon3 และโค้ดพื้นหลังวิดีโอ) ก่อน </body> -->
+
+<!-- ===== ADDON 4: สีแถบเมนู ===== -->
 <style>
 .dw{background:var(--mnbg,var(--bg))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .dw .dh b,.dw .di{color:var(--mntx,var(--tx))!important;text-shadow:none!important}
@@ -901,10 +908,10 @@ const _r=render;render=function(){
 _r();apply();
 if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>สีแถบเมนู</h3><div class="mu" style="margin-bottom:8px">เมนู 3 ขีด (ทึบ อ่านง่าย) และเมนูลัดด้านล่าง</div>${row("mnBg","พื้นหลังเมนู 3 ขีด","#ffffff")}${row("mnTx","ตัวอักษรเมนู 3 ขีด","#161616")}${row("mnAc","สีรายการที่เลือกอยู่","#0f766e")}${row("bnBg","พื้นหลังเมนูลัดด้านล่าง","#ffffff")}<button class="b s f" onclick="cuMnReset()">รีเซ็ตกลับค่าเดิม</button></div>`);
 };
-render();
 })();
 </script>
-<!-- วางต่อท้ายสุด (หลัง addon4) ก่อน </body> -->
+
+<!-- ===== ADDON 5: สีการแจ้งเตือน ===== -->
 <style>
 .ts,.ts.er{background:var(--tsbg,var(--bg))!important;color:var(--tstx,var(--tx))!important;border-color:var(--tsok,var(--ok))!important}
 .ts.er{border-color:var(--tser,var(--er))!important}
@@ -921,11 +928,10 @@ const _r=render;render=function(){
 _r();apply();
 if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>สีการแจ้งเตือน</h3><div class="mu" style="margin-bottom:8px">กล่องแจ้งเตือนด้านบน (สำเร็จ / ผิดพลาด) และแถบประกาศวิ่ง</div>${row("tsBg","พื้นหลังกล่องแจ้งเตือน","#ffffff")}${row("tsTx","ตัวอักษรแจ้งเตือน","#161616")}${row("tsOk","ขอบเมื่อสำเร็จ","#15803d")}${row("tsEr","ขอบเมื่อผิดพลาด","#c62828")}${row("nbBg","พื้นหลังแถบประกาศวิ่ง","#ffffff")}${row("nbTx","ตัวอักษรแถบประกาศวิ่ง","#161616")}<button class="b f" onclick="cuNtTest()">ทดสอบการแจ้งเตือน</button><button class="b s f" onclick="cuNtReset()">รีเซ็ตกลับค่าเดิม</button></div>`);
 };
-render();
 })();
 </script>
 
-  <!-- วางต่อท้ายสุด (หลัง addon5) ก่อน </body> -->
+<!-- ===== ADDON 6: ขนาดการแจ้งเตือน ===== -->
 <style>
 #tw{zoom:var(--tss,1);width:min(calc(92vw / var(--tss,1)),360px)}
 #tpo .rg,#tpo h2,#tpo .am,#tpo .mu{zoom:var(--tps,1)}
@@ -941,11 +947,10 @@ const _r=render;render=function(){
 _r();apply();
 if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>ขนาดการแจ้งเตือน</h3><div class="mu" style="margin-bottom:8px">ปรับแยกกัน เล็กสุด 60% ใหญ่สุด 160%</div>${sl("tsSz","แจ้งเตือนปกติ (เช่น บันทึกแล้ว)")}<button class="b s sm" onclick="cuSzTest('n')">ทดสอบ</button>${sl("tpSz","แจ้งเตือนเติมเงินสำเร็จ (หน้าจอเขียว)")}<button class="b s sm" onclick="cuSzTest('top')">ทดสอบ</button><button class="b s f" onclick="cuSzReset()">รีเซ็ตกลับ 100%</button></div>`);
 };
-render();
 })();
 </script>
 
-  <!-- วางต่อท้ายสุด (หลัง addon6) ก่อน </body> : วิดีโอป้ายประกาศหน้าหลัก + ลบพื้นหลัง -->
+<!-- ===== ADDON 7: วิดีโอป้ายประกาศหน้าหลัก + ลบพื้นหลัง ===== -->
 <script>
 (()=>{
 const FV=()=>firebase.firestore.FieldValue;
@@ -1018,11 +1023,10 @@ src().then(u=>{if(u&&document.body.contains(box))build(box,u)}).catch(()=>{});
 }
 if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",card());
 };
-render();
 })();
 </script>
 
-  <!-- วางต่อท้ายสุด (หลัง addon7) ก่อน </body> : แจ้งเตือนเครดิตต้อนรับสมาชิกใหม่ (หน้าจอแบบเงินเข้า) -->
+<!-- ===== ADDON 8: เครดิตต้อนรับสมาชิกใหม่ ===== -->
 <script>
 (()=>{
 const _td=topDone;
@@ -1038,51 +1042,17 @@ const _r=render;render=function(){
 _r();
 if(tab=="a_cust"&&isAdm()&&!MAIN)$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>เครดิตต้อนรับสมาชิกใหม่</h3><div class="mu" style="margin-bottom:8px">สมัครเสร็จแล้วลูกค้าจะเห็นหน้าจอเขียวแบบเงินเข้าทันที (ใส่ 0 = ไม่แจกและไม่แจ้งเตือน)</div><label class="mu">จำนวนเครดิต (บาท)</label><input type="number" min="0" value="${+site.welcome||0}" onchange="cuSet('welcome',+this.value||0)"><label class="mu">หัวข้อที่แสดง</label><input value="${esc(site.welcomeMsg||"")}" placeholder="ยินดีต้อนรับสมาชิกใหม่" onchange="cuSet('welcomeMsg',this.value.trim())"><button class="b s f" onclick="lastTp=0;topDone(+site.welcome||50,site.welcomeMsg||'ยินดีต้อนรับสมาชิกใหม่')">ดูตัวอย่าง</button></div>`);
 };
-render();
 })();
 </script>
 
-  <!-- วางต่อท้ายสุด (หลัง addon10) ก่อน </body> : จัดหมวดเมนูแอดมินใหม่ -->
-<script>
-(()=>{
-const _NAV=NAV;
-NAV=function(){
-const G=_NAV();
-if(!isAdm())return G;
-const m={},used=new Set();
-G.forEach(([g,L])=>L.forEach(i=>{m[i[0]]=i}));
-if(m.a_cust)m.a_cust=[m.a_cust[0],"ปรับแต่งทั้งหมด (วิดีโอ/รูป/แชท/สี)","wand"];
-const grp=(t,ks)=>{const L=ks.filter(k=>m[k]);L.forEach(k=>used.add(k));return[t,L.map(k=>m[k])]};
-const out=MAIN?[
-grp("จัดการเว็บเช่า",["a_rent","a_plan","a_shops"]),
-grp("การเงิน",["a_pay"]),
-grp("ปรับแต่งหน้าตา",["a_cust","a_brand","a_look","a_anim"]),
-grp("ข้อมูลและประกาศ",["a_info"]),
-]:[
-grp("ภาพรวม",["a_dash"]),
-grp("สินค้า",["a_prod"]),
-grp("การเงิน",["a_top","a_keys","a_pay"]),
-grp("ปรับแต่งหน้าตา",["a_cust","a_brand","a_look","a_card","a_anim"]),
-grp("ข้อมูลร้าน",["a_info"]),
-grp("หน้าร้าน",["shop"]),
-];
-const rest=Object.keys(m).filter(k=>!used.has(k)&&k!="acct");
-if(rest.length)out.push(grp("อื่นๆ",rest));
-out.push(grp("บัญชี",["acct"]));
-return out.filter(g=>g[1].length);
-};
-render();
-})();
-</script>
-
-  <!-- วางต่อท้ายสุด (หลัง addon12) ก่อน </body> : เมนูแจกเครดิตให้ผู้เล่น (ฝั่งร้าน) -->
+<!-- ===== ADDON 9: แจกเครดิตให้ผู้เล่น (ฝั่งร้าน) ===== -->
 <script>
 (()=>{
 if(MAIN)return;
 const FV=()=>firebase.firestore.FieldValue;
 const ov=on=>{if(on){if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}}else $("#ld")?.remove()};
 const _NAV=NAV;
-NAV=function(){const G=_NAV();if(isAdm()){const g=G.find(x=>x[0]=="การเงิน");if(g)g[1].push(["a_gift","แจกเครดิตให้ผู้เล่น","bolt"])}return G};
+NAV=function(){const G=_NAV();if(isAdm()){const g=G.find(x=>x[0]=="การเงิน");if(g&&!g[1].some(i=>i[0]=="a_gift"))g[1].push(["a_gift","แจกเครดิตให้ผู้เล่น","bolt"])}return G};
 window.giftQ="";
 window.giftList=()=>{
 const q=giftQ.toLowerCase();
@@ -1118,15 +1088,14 @@ try{await give(us,a,n);await load();render();say("แจกให้ "+us.length
 const _r=render;render=function(){
 _r();
 if(tab=="a_gift"&&isAdm()){
-[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb"))e.remove()});
+[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb")&&e.id!="nbv")e.remove()});
 $("#app").insertAdjacentHTML("beforeend",`<h3 class="ph">แจกเครดิตให้ผู้เล่น</h3>`+page());
 }
 };
-render();
 })();
 </script>
 
-  <!-- วางต่อท้ายสุด (หลัง addon13) ก่อน </body> : เติมเงินผ่าน TrueMoney แบบแอดมินตรวจสลิป (ไม่ต้องใช้เซิร์ฟเวอร์) -->
+<!-- ===== ADDON 10: เติมเงินผ่าน TrueMoney (ฝั่งลูกค้า + รายการโอนฝั่งแอดมิน) ===== -->
 <script>
 (()=>{
 if(MAIN)return;
@@ -1154,15 +1123,10 @@ const tag=t=>t.method=="truemoney"?'<span class="chip ok">TrueMoney</span>':t.me
 adTopUI=function(){
 return `<div class="c"><h3>รายการแจ้งโอน</h3>${tops.slice(0,60).map(t=>`<div class="rw"><div style="min-width:0"><b>${esc(t.u)}</b> · ${t.amount} บาท ${tag(t)}<div class="mu">${fd(t.at)}</div>${/^https:\/\//.test(t.link||"")?`<a class="mu" style="word-break:break-all" href="${esc(t.link)}" target="_blank" rel="noopener">เปิดลิงก์ซองอั่งเปา</a>`:""}${t.note?`<div class="mu">${esc(t.note)}</div>`:""}</div><span class="ac">${t.img?`<button class="b s sm" onclick="showImg('${t.id}')">สลิป</button>`:""}${t.status=="pending"?`<button class="b sm" onclick="decide('${t.id}',1)">อนุมัติ</button><button class="b d sm" onclick="decide('${t.id}',0)">ปฏิเสธ</button>`:stChip(t.status)}</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`;
 };
-const _r=render;render=function(){
-_r();
-if(tab=="a_cust"&&isAdm())$("#app").insertAdjacentHTML("beforeend",`<div class="c cu"><h3>รับเงินผ่าน TrueMoney (ตรวจสลิปเอง)</h3><div class="mu" style="margin-bottom:8px">ใส่เบอร์/ชื่อ TrueMoney Wallet และ QR ลูกค้าจะแจ้งโอนพร้อมสลิป หรือแนบลิงก์ซองอั่งเปา แล้วคุณกดอนุมัติในเมนู "รายการโอน" ว่างทั้งสองช่อง = ปิด</div><textarea placeholder="เช่น TrueMoney 0812345678 ชื่อ สมชาย / โอนหรือส่งซองอั่งเปาเข้าเบอร์นี้" onchange="cuSet('twPay',this.value.trim())">${esc(site.twPay||"")}</textarea>${site.twQr?`<img class="pv" src="${esc(site.twQr)}">`:'<div class="mu">ยังไม่มีรูป QR</div>'}<input type="file" accept="image/*" onchange="cuUp('twQr',500,this)">${site.twQr?`<button class="b d sm" onclick="cuDel('twQr')">ลบรูป QR</button>`:""}</div>`);
-};
-render();
 })();
 </script>
 
-  <!-- ===== เมนูแอดมินทั้งหมด (บล็อกเดียว มีตัวกันหน้าว่าง) ===== -->
+<!-- ===== บล็อกสุดท้าย: เมนูแอดมิน (หมวด > หน้า) + ตัวกันหน้าว่าง ===== -->
 <style>
 .dsc details{margin-top:6px}
 .dsc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:11px 10px;font-size:14px;font-weight:600;color:var(--mntx,var(--tx));cursor:pointer;border-radius:12px;user-select:none}
@@ -1180,48 +1144,50 @@ render();
 (()=>{
 let inC=false;
 
-/* ---------- 1) โครงเมนูแอดมิน: หมวด > หน้า ---------- */
+/* 1) โครงเมนูแอดมิน: [ชื่อหมวด, [รายการ], ไอคอน] */
 const _N=NAV;
 NAV=function(){
 const G=_N();
 if(!isAdm())return G;
 const m={};G.forEach(([g,L])=>L.forEach(i=>m[i[0]]=i));
 const I=(k,l,ic)=>[k,l,ic,m[k]?m[k][3]:""];
-const menu=()=>["เมนูและปุ่ม","menu",[I("c_menu","เมนูลัดล่าง / สีแถบเมนู","menu"),I("c_chat","ปุ่มแชทลอย (รูป + ขนาด)","chat")]];
-const ann=()=>["ประกาศและแจ้งเตือน","info",[I("a_info","ข้อความ / ติดต่อ / ป๊อปอัป","info"),I("c_ads","แถบประกาศ / รูป / วิดีโอ / โฆษณา","info"),I("c_notify","สีและขนาดแจ้งเตือน","bolt")]];
-const acc=()=>["บัญชี","user",[I("acct","บัญชี / โปรไฟล์ / รหัสผ่าน","user")]];
+const menu=()=>["เมนูและปุ่ม",[I("c_menu","เมนูลัดล่าง / สีแถบเมนู","menu"),I("c_chat","ปุ่มแชทลอย (รูป + ขนาด)","chat")],"menu"];
+const ann=()=>["ประกาศและแจ้งเตือน",[I("a_info","ข้อความ / ติดต่อ / ป๊อปอัป","info"),I("c_ads","แถบประกาศ / รูป / วิดีโอ / โฆษณา","info"),I("c_notify","สีและขนาดแจ้งเตือน","bolt")],"info"];
+const acc=()=>["บัญชี",[I("acct","บัญชี / โปรไฟล์ / รหัสผ่าน","user")],"user"];
 const out=MAIN?[
-["จัดการเว็บเช่า","shop",[I("a_rent","คำสั่งเช่า","doc"),I("a_plan","แพ็กเกจเช่า","tag"),I("a_shops","ร้านที่เช่า","shop")]],
-["การเงิน","card",[I("a_pay","บัญชีรับโอนค่าเช่า (ธนาคาร + TrueMoney)","card")]],
-["หน้าตาเว็บ","pal",[I("a_brand","ชื่อ / โลโก้ / แบนเนอร์","star"),I("a_look","สี / ฟอนต์","pal"),I("c_bg","วิดีโอพื้นหลัง","wand"),I("a_anim","แอนิเมชัน / ลูกเล่น","wand")]],
+["จัดการเว็บเช่า",[I("a_rent","คำสั่งเช่า","doc"),I("a_plan","แพ็กเกจเช่า","tag"),I("a_shops","ร้านที่เช่า","shop")],"shop"],
+["การเงิน",[I("a_pay","บัญชีรับโอนค่าเช่า (ธนาคาร + TrueMoney)","card")],"card"],
+["หน้าตาเว็บ",[I("a_brand","ชื่อ / โลโก้ / แบนเนอร์","star"),I("a_look","สี / ฟอนต์","pal"),I("c_bg","วิดีโอพื้นหลัง","wand"),I("a_anim","แอนิเมชัน / ลูกเล่น","wand")],"pal"],
 menu(),ann(),acc()
 ]:[
-["ภาพรวม","chart",[I("a_dash","สรุปร้าน","chart")]],
-["สินค้า","box",[I("a_prod","จัดการสินค้า / หมวดหมู่","box")]],
-["การเงิน","bolt",[I("a_top","รายการโอน (อนุมัติสลิป)","bolt"),I("a_pay","บัญชีรับเงิน (ธนาคาร + TrueMoney)","card"),I("a_keys","คีย์เติมเงิน","key"),I("a_gift","แจกเครดิตให้ผู้เล่น","bolt"),I("c_welcome","เครดิตต้อนรับสมาชิกใหม่","star")]],
-["หน้าตาร้าน","pal",[I("a_brand","ชื่อ / โลโก้ / แบนเนอร์","star"),I("a_look","สี / ฟอนต์","pal"),I("a_card","การ์ดสินค้า","card"),I("c_bg","วิดีโอพื้นหลัง","wand"),I("a_anim","แอนิเมชัน / ลูกเล่น","wand")]],
+["ภาพรวม",[I("a_dash","สรุปร้าน","chart")],"chart"],
+["สินค้า",[I("a_prod","จัดการสินค้า / หมวดหมู่","box")],"box"],
+["การเงิน",[I("a_top","รายการโอน (อนุมัติสลิป)","bolt"),I("a_pay","บัญชีรับเงิน (ธนาคาร + TrueMoney)","card"),I("a_keys","คีย์เติมเงิน","key"),I("a_gift","แจกเครดิตให้ผู้เล่น","bolt"),I("c_welcome","เครดิตต้อนรับสมาชิกใหม่","star")],"bolt"],
+["หน้าตาร้าน",[I("a_brand","ชื่อ / โลโก้ / แบนเนอร์","star"),I("a_look","สี / ฟอนต์","pal"),I("a_card","การ์ดสินค้า","card"),I("c_bg","วิดีโอพื้นหลัง","wand"),I("a_anim","แอนิเมชัน / ลูกเล่น","wand")],"pal"],
 menu(),ann(),
-["หน้าร้าน","shop",[I("shop","ดูหน้าร้านลูกค้า","shop")]],
+["หน้าร้าน",[I("shop","ดูหน้าร้านลูกค้า","shop")],"shop"],
 acc()
 ];
-if(inC)out.push(["","wand",[["a_cust","","wand"]]]);
+if(inC)out.push(["",[["a_cust","","wand"]],"wand"]);
 return out;
 };
 
-/* ---------- 2) เมนู 3 ขีด: หมวดพับ/ขยายได้ ---------- */
+/* 2) เมนู 3 ขีด: หมวดพับ/ขยายได้ (ลูกค้าก็ใช้ตัวนี้ได้ เพราะไม่มีไอคอนหมวดจะใช้ไอคอน info) */
 window.__mg=window.__mg||{};
 menuOpen=function(){
+try{
 const G=NAV();
 $("#mo").innerHTML=`<div class="ov dr" onclick="if(event.target==this)closeM()"><div class="dw"><div class="dh">${site.logo?`<img src="${esc(site.logo)}">`:""}<b>${esc(nm())}</b><button class="ib" onclick="closeM()">${ico("close")}</button></div>${me?`<div class="dme">${isAdm()?"ผู้ดูแล":esc(me.u)}${!isAdm()&&!MAIN?` · <span class="bal">${wal.credits||0} บาท</span>`:""}</div>`:""}<div class="dsc">${G.map(([g,L,ic],gi)=>{
-const has=L.some(x=>x[0]==tab),op=window.__mg[gi]!==undefined?window.__mg[gi]:has,bd=L.reduce((s,x)=>s+(+x[3]||0),0);
+const has=L.some(x=>x[0]==tab),op=window.__mg[gi]!==undefined?window.__mg[gi]:true,bd=L.reduce((s,x)=>s+(+x[3]||0),0);
 return `<details ${op||has?"open":""} ontoggle="__mg[${gi}]=this.open"><summary><span class="gi">${ico(ic||"info")}</span>${g}${bd?`<span class="gb">${bd}</span>`:""}</summary><div class="gl">${L.map(([k,l,i2,b])=>`<button class="di ${tab==k?"on":""}" onclick="goT('${k}')"><span class="dic">${ico(i2)}</span><span>${l}</span>${b?`<span class="er ml">${b}</span>`:""}</button>`).join("")}</div></details>`}).join("")}</div><div class="dq"><button class="di" onclick="toggleTheme()"><span class="dic">${ico("moon")}</span><span>สลับโหมดมืด / สว่าง</span></button>${me?`<button class="di" onclick="logout()"><span class="dic">${ico("out")}</span><span>ออกจากระบบ</span></button>`:`<button class="di" onclick="authUI(0)"><span class="dic">${ico("login")}</span><span>เข้าสู่ระบบ / สมัครสมาชิก</span></button>`}</div></div></div>`;
+}catch(e){showErr("เมนู: "+(e&&e.message||e))}
 };
 
 /* ปุ่ม "ปรับแต่ง" ที่แถบล่าง พาไปหน้า ชื่อ/โลโก้ */
 const _g=goT;
 goT=function(k){if(k=="a_cust"&&isAdm())k="a_brand";_g(k)};
 
-/* ---------- 3) ธนาคาร + TrueMoney อยู่ฟอร์มเดียว ปุ่มบันทึกเดียว ---------- */
+/* 3) ธนาคาร + TrueMoney อยู่ฟอร์มเดียว ปุ่มบันทึกเดียว */
 const _S=SCH;
 SCH=function(){
 const s=_S();
@@ -1242,7 +1208,7 @@ f.before(x);
 };
 }
 
-/* ---------- 4) หน้าย่อย: แยกจาก "ปรับแต่งทั้งหมด" เป็นหน้าละเรื่อง ---------- */
+/* 4) หน้าย่อยแยกจาก "ปรับแต่งทั้งหมด" */
 const PG={
 c_menu:{t:"เมนูลัดล่าง / สีแถบเมนู",k:["เมนูลัดด้านล่าง","สีแถบเมนู"]},
 c_chat:{t:"ปุ่มแชทลอย",k:["ปุ่มแชทลอย (วงกลม)"]},
@@ -1255,29 +1221,28 @@ const sizeCard=()=>{const v=+site.cbSize||58;return `<div class="c"><h3>ขน�
 window.cuCbReset=async()=>{try{await D("settings/site").update({cbSize:firebase.firestore.FieldValue.delete()});await load();render();say("รีเซ็ตขนาดปุ่มแชทแล้ว",1)}catch(e){say(ERR(e))}};
 const applySize=()=>{const n=+site.cbSize,r=document.documentElement.style;n>=40&&n<=120?r.setProperty("--cbs",n+"px"):r.removeProperty("--cbs")};
 
-/* ---------- 5) ตัวกันหน้าว่าง ---------- */
+/* 5) ตัวกันหน้าว่าง */
 const blank=()=>{const a=$("#app");return !!a&&![...a.children].some(e=>e.tagName!="HEADER"&&!e.classList.contains("nb")&&e.id!="nbv")};
 const fail=e=>{
 console.error(e);
 const a=$("#app");if(!a)return;
 a.querySelectorAll(".erx").forEach(x=>x.remove());
-a.insertAdjacentHTML("beforeend",`<div class="c erx"><h3 class="er">หน้านี้โหลดไม่สำเร็จ</h3><div class="mu" style="word-break:break-all">${esc((e&&e.message)||String(e))}</div><button class="b f" onclick="tab='';render()">กลับหน้าแรก</button></div>`);
+a.insertAdjacentHTML("beforeend",`<div class="c erx in"><h3 class="er">หน้านี้โหลดไม่สำเร็จ</h3><div class="mu" style="word-break:break-all">${esc((e&&e.message)||String(e))}</div><button class="b f" onclick="tab='';render()">กลับหน้าแรก</button></div>`);
 };
 
-/* ---------- 6) วาดหน้า ---------- */
+/* 6) วาดหน้า */
 const _r=render;
 render=function(){
 let bad=null;
 try{
 const t=tab,p=PG[t];
 if(isAdm()&&p&&!(t=="c_welcome"&&MAIN)){
-/* ให้ระบบเดิมสร้างการ์ดทั้งหมดก่อน แล้วเลือกมาเฉพาะของหน้านี้ (หาได้ทุกชั้น แม้อยู่ใน details) */
 inC=true;tab="a_cust";
 try{_r()}finally{tab=t;inC=false}
 const app=$("#app");
 const hit=[...app.querySelectorAll(".c")].filter(c=>{const h=c.querySelector(":scope > h3");return h&&p.k.some(n=>h.textContent.trim().startsWith(n))});
 const keep=hit.filter(c=>!hit.some(o=>o!==c&&o.contains(c)));
-[...app.children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb"))e.remove()});
+[...app.children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb")&&e.id!="nbv")e.remove()});
 app.insertAdjacentHTML("beforeend",`<h3 class="ph">${p.t}</h3>`);
 keep.forEach(c=>{c.classList.add("in");app.appendChild(c)});
 if(t=="c_chat")app.insertAdjacentHTML("beforeend",sizeCard());
@@ -1285,19 +1250,14 @@ if(!keep.length&&t!="c_chat")app.insertAdjacentHTML("beforeend",'<div class="c m
 }else{
 _r();
 }
-/* เอาการ์ด TrueMoney แยกของบล็อกเก่าออก (ตอนนี้อยู่ในฟอร์มธนาคารแล้ว) */
-document.querySelectorAll("#app .c.cu").forEach(e=>{const h=e.querySelector(":scope > h3");if(h&&h.textContent.startsWith("รับเงินผ่าน TrueMoney"))e.remove()});
 }catch(e){inC=false;bad=e}
 if(bad)fail(bad);
 else if(blank()&&!window.__rb){window.__rb=1;tab="";try{render()}finally{window.__rb=0}}
 try{applySize()}catch(e){}
 };
+
 render();
 })();
 </script>
-
-
-  
-
 
 </body></html>
