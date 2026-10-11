@@ -1042,6 +1042,39 @@ render();
 })();
 </script>
 
+  <!-- วางต่อท้ายสุด (หลัง addon10) ก่อน </body> : จัดหมวดเมนูแอดมินใหม่ -->
+<script>
+(()=>{
+const _NAV=NAV;
+NAV=function(){
+const G=_NAV();
+if(!isAdm())return G;
+const m={},used=new Set();
+G.forEach(([g,L])=>L.forEach(i=>{m[i[0]]=i}));
+if(m.a_cust)m.a_cust=[m.a_cust[0],"ปรับแต่งทั้งหมด (วิดีโอ/รูป/แชท/สี)","wand"];
+const grp=(t,ks)=>{const L=ks.filter(k=>m[k]);L.forEach(k=>used.add(k));return[t,L.map(k=>m[k])]};
+const out=MAIN?[
+grp("จัดการเว็บเช่า",["a_rent","a_plan","a_shops"]),
+grp("การเงิน",["a_pay"]),
+grp("ปรับแต่งหน้าตา",["a_cust","a_brand","a_look","a_anim"]),
+grp("ข้อมูลและประกาศ",["a_info"]),
+]:[
+grp("ภาพรวม",["a_dash"]),
+grp("สินค้า",["a_prod"]),
+grp("การเงิน",["a_top","a_keys","a_pay"]),
+grp("ปรับแต่งหน้าตา",["a_cust","a_brand","a_look","a_card","a_anim"]),
+grp("ข้อมูลร้าน",["a_info"]),
+grp("หน้าร้าน",["shop"]),
+];
+const rest=Object.keys(m).filter(k=>!used.has(k)&&k!="acct");
+if(rest.length)out.push(grp("อื่นๆ",rest));
+out.push(grp("บัญชี",["acct"]));
+return out.filter(g=>g[1].length);
+};
+render();
+})();
+</script>
+
   
   
 
