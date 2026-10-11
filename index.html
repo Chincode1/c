@@ -1219,6 +1219,26 @@ render();
 })();
 </script>
 
+  <!-- ปรับขนาดปุ่มแชทลอย -->
+<style>
+#cb{width:var(--cbs,58px);height:var(--cbs,58px)}
+#cb svg{width:calc(var(--cbs,58px)*.45);height:calc(var(--cbs,58px)*.45)}
+</style>
+<script>
+(()=>{
+const apply=()=>{const n=+site.cbSize,r=document.documentElement.style;n>=40&&n<=120?r.setProperty("--cbs",n+"px"):r.removeProperty("--cbs")};
+window.cuCbReset=async()=>{try{await D("settings/site").update({cbSize:firebase.firestore.FieldValue.delete()});await load();render();say("รีเซ็ตขนาดปุ่มแชทแล้ว",1)}catch(e){say(ERR(e))}};
+const _r=render;render=function(){
+_r();apply();
+if(tab=="a_cust"&&isAdm()){
+const v=+site.cbSize||58;
+$("#app").insertAdjacentHTML("beforeend",`<div class="c"><h3>ขนาดปุ่มแชทลอย</h3><div class="mu" style="margin-bottom:8px">ปรับได้ 40 - 120 px (ค่าเริ่มต้น 58)</div><label class="mu">ขนาด: <b id="cbv">${v}</b> px</label><input type="range" min="40" max="120" step="2" value="${v}" oninput="document.getElementById('cbv').textContent=this.value;document.documentElement.style.setProperty('--cbs',this.value+'px')" onchange="cuSet('cbSize',+this.value)"><button class="b s f" onclick="cuCbReset()">รีเซ็ตกลับ 58px</button></div>`);
+}
+};
+render();
+})();
+</script>
+
   
   
 
