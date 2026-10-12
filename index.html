@@ -1260,4 +1260,130 @@ render();
 })();
 </script>
 
+<!-- ===== ADDON 11: แจกเครดิต/เครดิตต้อนรับ เฉพาะเว็บหลัก + จ่ายค่าเช่าด้วยเครดิต ===== -->
+<script>
+(()=>{
+const FV=()=>firebase.firestore.FieldValue;
+const ov=on=>{if(on){if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}}else $("#ld")?.remove()};
+const g=async q=>(await q.get().catch(()=>({docs:[]}))).docs.map(x=>({id:x.id,...x.data()}));
+
+/* โหลดข้อมูล: เว็บหลักมีกระเป๋าเงิน / ร้านเช่าไม่มีเครดิตต้อนรับ */
+const _l=load;
+load=async function(){
+await _l();
+if(!MAIN){site.welcome=0;return}
+try{
+if(isAdm()){accts=await g(C("accounts"));wals=await g(C("wallets"))}
+else if(me){const w=await D("wallets/"+me.u).get().catch(()=>({exists:false}));wal=w.exists?w.data():{credits:0,orders:[]}}
+}catch(e){}
+};
+
+/* ติดตามยอดเงินสด (ใช้ได้ทุกเว็บ รวมเว็บหลัก) */
+liveWallet=function(){
+if(unW){unW();unW=null}prevC=null;
+if(!me||isAdm())return;
+try{unW=D("wallets/"+me.u).onSnapshot(s=>{const c=s.exists?(s.data().credits||0):0;if(prevC!==null&&c>prevC)topDone(c-prevC);prevC=c;wal.credits=c;document.querySelectorAll(".bal").forEach(e=>e.textContent=c+" บาท")},()=>{})}catch(e){}
+};
+
+/* สมัครสมาชิกที่เว็บหลัก: สร้างกระเป๋า + เครดิตต้อนรับ */
+const _d=doAuth;
+doAuth=async function(up){
+const u=($("#au")?.value||"").trim();
+await _d(up);
+if(up&&MAIN&&me&&!isAdm()&&me.u===u){
+try{
+const r=D("wallets/"+u);
+if(!(await r.get()).exists){
+const w=+site.welcome||0;
+prevC=w;await r.set({credits:w,orders:[]});wal.credits=w;
+if(w>0){lastTp=0;topDone(w,site.welcomeMsg||"ยินดีต้อนรับสมาชิกใหม่")}
+document.querySelectorAll(".bal").forEach(e=>e.textContent=w+" บาท");
+}
+}catch(e){}
+}
+};
+
+/* เมนู: เว็บหลักเพิ่มเมนูแจกเครดิต / ร้านเช่าตัดออก */
+const _N=NAV;
+NAV=function(){
+const G=_N();
+if(!isAdm())return G;
+if(!MAIN)return G.map(([n,L,i])=>[n,L.filter(x=>!["a_gift","c_welcome"].includes(x[0])),i]);
+const f=G.find(x=>x[0]=="การเงิน");
+if(f&&!f[1].some(x=>x[0]=="a_gift"))f[1].push(["a_gift","แจกเครดิต / เครดิตต้อนรับ","bolt",""]);
+return G;
+};
+
+/* ร้านเช่า: ซ่อนช่องเงินต้อนรับในฟอร์มตั้งค่า */
+const _S=SCH;
+SCH=function(){const s=_S();if(!MAIN)s.info=s.info.filter(f=>f[1]!="welcome");return s};
+
+/* หน้าแจกเครดิต (เว็บหลักเท่านั้น) */
+let gQ="";
+const list=()=>{const q=gQ.toLowerCase();return accts.filter(a=>!q||a.id.toLowerCase().includes(q)).slice(0,60).map(a=>{const w=wals.find(x=>x.id==a.id);return `<div class="rw"><span><b>${esc(a.id)}</b><div class="mu">${(w&&w.credits)||0} บาท${a.banned?" · ระงับ":""}</div></span><button class="b sm" data-u="${esc(a.id)}" onclick="mgOne(this.dataset.u)">แจกเครดิต</button></div>`}).join("")||'<span class="mu">ไม่พบสมาชิก</span>'};
+window.mgList=()=>list();
+window.mgQ=v=>{gQ=v;document.getElementById("mgl").innerHTML=list()};
+const page=()=>`<div class="c"><h3>เครดิตต้อนรับสมาชิกใหม่</h3><div class="mu" style="margin-bottom:8px">สมัครเสร็จได้เครดิตทันที พร้อมหน้าจอเขียวแจ้งเตือน (ใส่ 0 = ไม่แจก)</div><label class="mu">จำนวนเครดิต (บาท)</label><input type="number" min="0" value="${+site.welcome||0}" onchange="cuSet('welcome',+this.value||0)"><label class="mu">หัวข้อที่แสดง</label><input value="${esc(site.welcomeMsg||"")}" placeholder="ยินดีต้อนรับสมาชิกใหม่" onchange="cuSet('welcomeMsg',this.value.trim())"></div><div class="c"><h3>แจกให้สมาชิกทุกคน</h3><div class="mu">สมาชิกทั้งหมด ${accts.length} คน</div><input id="mga" type="number" min="1" placeholder="จำนวนเครดิตต่อคน (บาท)"><button class="b f" onclick="mgAll()">แจกทุกคน</button></div><div class="c"><h3>แจกรายคน</h3><input placeholder="ค้นหาชื่อผู้ใช้" oninput="mgQ(this.value)"><div id="mgl">${list()}</div></div>`;
+const give=async(us,amt)=>{for(let i=0;i<us.length;i+=400){const b=R.batch();us.slice(i,i+400).forEach(u=>b.set(D("wallets/"+u),{credits:FV().increment(amt)},{merge:true}));await b.commit()}};
+const chk=a=>a>0&&a<=100000;
+window.mgOne=u=>modal(`<h3 style="margin:0 0 6px">แจกเครดิตให้ ${esc(u)}</h3><input id="mgx" type="number" min="1" placeholder="จำนวน (บาท)"><button class="b f" data-u="${esc(u)}" onclick="mgGo(this.dataset.u)">ยืนยันแจก</button>`);
+window.mgGo=async u=>{
+const a=+$("#mgx").value;
+if(!chk(a))return say("กรอกจำนวน 1 - 100,000 บาท");
+if(busy)return;busy=true;ov(1);
+try{await give([u],a);closeM();await load();render();say("แจก "+a+" บาท ให้ "+u+" แล้ว",1)}catch(e){say(ERR(e))}finally{busy=false;ov(0)}
+};
+window.mgAll=async()=>{
+const a=+$("#mga").value,us=accts.filter(x=>!x.banned).map(x=>x.id);
+if(!chk(a))return say("กรอกจำนวน 1 - 100,000 บาท");
+if(!us.length)return say("ยังไม่มีสมาชิก");
+if(!confirm("แจก "+a+" บาท ให้ "+us.length+" คน (รวม "+a*us.length+" บาท)?"))return;
+if(busy)return;busy=true;ov(1);
+try{await give(us,a);await load();render();say("แจกให้ "+us.length+" คนแล้ว",1)}catch(e){say(ERR(e))}finally{busy=false;ov(0)}
+};
+
+/* วาดหน้า + แสดงยอดเงินที่หัวเว็บหลัก */
+const _r=render;
+render=function(){
+_r();
+if(!MAIN)return;
+if(tab=="a_gift"&&isAdm()){
+[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb")&&e.id!="nbv")e.remove()});
+$("#app").insertAdjacentHTML("beforeend",`<h3 class="ph">แจกเครดิต</h3>`+page());
+}
+if(me&&!isAdm()){const h=document.querySelector("#app header>span.r");if(h&&!h.querySelector(".bal"))h.insertAdjacentHTML("afterbegin",`<span class="bal">${wal.credits||0} บาท</span>`)}
+};
+
+/* เว็บหลัก: ปุ่มจ่ายค่าเช่าด้วยเครดิต */
+if(MAIN){
+const _rent=rent;
+rent=function(id){
+_rent(id);
+const m=document.querySelector("#mo .md"),p=plans.find(x=>x.id==id);
+if(!m||!p||m.querySelector(".pcx"))return;
+const b=document.createElement("button");b.className="b s f pcx";b.textContent="จ่ายด้วยเครดิต (มี "+(wal.credits||0)+" บาท)";b.onclick=()=>payCredit(id);m.appendChild(b);
+};
+window.payCredit=async id=>{
+const p=plans.find(x=>x.id==id);
+if(!p||busy)return;
+if((wal.credits||0)<p.price)return say("เครดิตไม่พอ");
+busy=true;ov(1);
+try{
+await R.runTransaction(async t=>{
+const wr=D("wallets/"+me.u),s=await t.get(wr),d=s.exists?s.data():{credits:0,orders:[]};
+if((d.credits||0)<p.price)throw Error("เครดิตไม่พอ");
+t.set(wr,{...d,credits:d.credits-p.price,orders:[...(d.orders||[]),{name:"เช่า "+TN[p.tier]+" "+p.days+" วัน",price:p.price,at:Date.now()}]});
+t.set(D("rentals/"+rs()),{u:me.u,tier:p.tier,days:p.days,price:p.price,at:Date.now(),status:"approved",method:"credit"});
+});
+closeM();tab="mine";await load();render();say("จ่ายด้วยเครดิตแล้ว ตั้งค่าร้านได้เลย",1);
+}catch(e){say(ERR(e))}finally{busy=false;ov(0)}
+};
+}
+})();
+</script>
+
+
+
+
+  
 </body></html>
