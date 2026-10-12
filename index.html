@@ -1960,6 +1960,58 @@ if(c&&/หมดอายุ/.test(c.textContent)&&!a.querySelector(".gomain"))c
 })();
 </script>
 
+<!-- ===== ADDON 18: แจ้งเตือนผ่านแล้ว → เด้งตั้งค่าร้าน / ต่อเช่าเสร็จ → กลับไปเว็บ ===== -->
+<script>
+(()=>{
+if(!MAIN)return;
+let un=null,uid=null,t=null;
+const gs=()=>{try{return JSON.parse(LS.get("seenR")||"null")}catch(e){return null}};
+const ss=a=>LS.set("seenR",JSON.stringify(a));
+
+function check(L){
+if(!me||isAdm())return;
+let seen=gs();const first=seen===null;seen=seen||[];
+const rn=L.filter(r=>r.type=="renew"&&r.status=="done");
+/* ครั้งแรก: ต่อเช่าเก่าๆ ถือว่าเห็นแล้ว จะได้ไม่เด้งย้อนหลัง */
+if(first){rn.forEach(r=>seen.push(r.id));ss(seen)}
+const ap=L.find(r=>!r.type&&r.status=="approved"&&!seen.includes(r.id));
+const nr=rn.filter(r=>!seen.includes(r.id));
+if(!ap&&!nr.length)return;
+clearTimeout(t);
+t=setTimeout(()=>{
+if($("#mo").innerHTML)return check(L); /* มีหน้าต่างอื่นเปิดอยู่ รอก่อน */
+if(ap){
+seen.push(ap.id);nr.forEach(r=>seen.push(r.id));ss(seen);
+tab="mine";render();confetti();
+shopForm(ap.id);
+$("#mo .md")?.insertAdjacentHTML("afterbegin",`<div class="msg" style="margin-top:0;border:1px solid var(--ok)"><b>✅ ตรวจสลิปผ่านแล้ว</b>\nตั้งค่าร้านของคุณได้เลย</div>`);
+return;
+}
+nr.forEach(r=>seen.push(r.id));ss(seen);
+const r=nr[0];
+tab="mine";render();confetti();
+modal(`<h3 style="margin:0">✅ ต่อเช่าเสร็จแล้ว</h3><div class="msg" style="border:1px solid var(--ok)">ร้าน ${esc(r.shop)} ต่อเวลาเรียบร้อยแล้ว</div><a class="b f" style="display:block;text-align:center;text-decoration:none" href="${esc(shopLink(r.shop))}">กลับไปยังเว็บของคุณ</a><button class="b s f" onclick="closeM()">ปิด</button>`);
+},1200);
+}
+
+/* ติดตามรายการเช่าของลูกค้าแบบเรียลไทม์ */
+function sub(){
+const u=me&&!isAdm()?me.u:null;
+if(u===uid)return;
+un&&un();un=null;uid=u;
+if(!u)return;
+un=C("rentals").where("u","==",u).onSnapshot(s=>{
+const L=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.at-a.at);
+rentals=L;
+if(tab=="mine")render();
+check(L);
+},()=>{});
+}
+const _r=render;
+render=function(){_r();sub()};
+sub();
+})();
+</script>
 
 
   
