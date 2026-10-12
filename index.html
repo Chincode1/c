@@ -1620,6 +1620,50 @@ closeM();await load();render();say("ตั้งรหัสใหม่แล�
 })();
 </script>
 
+  <!-- ===== ADDON 16: สีเมนู/แจ้งเตือน แยกโหมดสว่าง-มืด ===== -->
+<script>
+(()=>{
+const K=[
+["mnBg","พื้นหลังเมนู 3 ขีด","#ffffff","#1c1c1c","--mnbg"],
+["mnTx","ตัวอักษรเมนู 3 ขีด","#161616","#f0f0ec","--mntx"],
+["mnAc","สีรายการที่เลือกอยู่","#0f766e","#2dd4bf","--mnac"],
+["bnBg","พื้นหลังเมนูลัดล่าง","#ffffff","#1c1c1c","--bnbg"],
+["bnc","สีปุ่มกลางเมนูลัดล่าง","#0f766e","#0f766e",null],
+["tsBg","พื้นหลังกล่องแจ้งเตือน","#ffffff","#1c1c1c","--tsbg"],
+["tsTx","ตัวอักษรแจ้งเตือน","#161616","#f0f0ec","--tstx"],
+["nbBg","พื้นหลังแถบประกาศวิ่ง","#ffffff","#1c1c1c","--nbbg"],
+["nbTx","ตัวอักษรแถบประกาศวิ่ง","#161616","#f0f0ec","--nbtx"]
+];
+const ok=v=>/^#[0-9a-f]{6}$/i.test(v||"");
+const dark=()=>{const t=document.documentElement.getAttribute("data-theme");return t?t=="dark":matchMedia("(prefers-color-scheme:dark)").matches};
+function apply(){
+const r=document.documentElement.style,d=dark();
+K.forEach(([k,,,,v])=>{
+const x=d&&ok(site[k+"D"])?site[k+"D"]:(ok(site[k])?site[k]:null);
+if(v){x?r.setProperty(v,x):r.removeProperty(v)}
+else{
+const c=x||hx(d?site.acD:site.ac,"#0f766e");
+r.setProperty("--bnc",c);r.setProperty("--bt",lum(c)>.45?"#111":"#fff");
+}
+});
+}
+window.cuModeReset=async()=>{
+try{await D("settings/site").update(Object.fromEntries(K.map(([k])=>[k+"D",firebase.firestore.FieldValue.delete()])));await load();render();say("รีเซ็ตสีโหมดมืดแล้ว",1)}catch(e){say(ERR(e))}
+};
+const row=([k,l,a,b])=>`<div style="margin-top:10px"><div class="mu">${l}</div><div style="display:flex;gap:8px"><div style="flex:1"><div class="mu" style="font-size:12px">สว่าง</div><input type="color" value="${hx(site[k],a)}" onchange="cuSet('${k}',this.value)"></div><div style="flex:1"><div class="mu" style="font-size:12px">มืด</div><input type="color" value="${hx(site[k+"D"],b)}" onchange="cuSet('${k}D',this.value)"></div></div></div>`;
+const _r=render;
+render=function(){
+_r();
+if(tab=="a_look"&&isAdm()&&!$("#md16"))$("#app").insertAdjacentHTML("beforeend",`<div class="c" id="md16"><h3>สีเมนู / แจ้งเตือน แยกโหมด</h3><div class="mu">ตั้งสีโหมดสว่างและโหมดมืดแยกกันได้ ช่องที่ไม่ได้แตะจะใช้สีตามธีมปกติ</div><button class="b s f" onclick="toggleTheme();render()">สลับดูโหมดมืด / สว่าง</button>${K.map(row).join("")}<button class="b s f" onclick="cuModeReset()">รีเซ็ตสีโหมดมืด</button></div>`);
+apply();
+};
+const _t=toggleTheme;
+toggleTheme=function(){_t();apply()};
+matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",apply);
+})();
+</script>
+
+  
 
 
   
