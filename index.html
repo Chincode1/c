@@ -2013,6 +2013,99 @@ sub();
 })();
 </script>
 
+<!-- ===== ADDON 19: แจ้งเตือนเรียลไทม์ (ไม่ต้องรีเฟรช) ===== -->
+<style>
+#cb .nd{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:var(--er);border:2px solid var(--bg)}
+</style>
+<script>
+(()=>{
+let subs=[],key=null,unread=false;
+const stop=()=>{subs.forEach(f=>{try{f()}catch(e){}});subs=[]};
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}};
+const dot=()=>{const b=$("#cb");if(!b)return;b.querySelector(".nd")?.remove();if(unread)b.insertAdjacentHTML("beforeend",'<i class="nd"></i>')};
+const idle=()=>{
+if($("#mo").innerHTML||$("#cp"))return false;
+const a=document.activeElement;
+return !(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName));
+};
+const soft=()=>{if(idle())render()};
+const L=s=>s.docs.map(d=>({id:d.id,...d.data()}));
 
+/* ล้างจุดแดงเมื่อเปิดแชท */
+["chatOpen","chatList"].forEach(n=>{
+const f=window[n];if(!f)return;
+window[n]=function(...a){unread=false;dot();return f.apply(this,a)};
+});
+
+function listen(q,onFirst,onNew,onAll){
+let ready=false;
+subs.push(q.onSnapshot(s=>{
+if(onAll)onAll(s);
+if(ready)s.docChanges().forEach(c=>{if(c.type=="added")onNew({id:c.doc.id,...c.doc.data()})});
+ready=true;
+},()=>{}));
+}
+
+function sub(){
+const k=me?me.u+"|"+me.role:"";
+if(k===key)return;
+key=k;stop();unread=false;
+if(!me)return;
+
+if(isAdm()){
+const t0=Date.now();
+/* แชทใหม่จากลูกค้า (ฟังเฉพาะข้อความที่เกิดหลังเปิดเว็บ) */
+subs.push(C("chat").where("at",">",t0).onSnapshot(s=>{
+s.docChanges().forEach(c=>{
+if(c.type!="added")return;
+const x=c.doc.data();
+if(x.from!="user"||$("#cp"))return;
+unread=true;dot();buzz();
+say("💬 "+x.u+": "+(x.t||"[รูป]").slice(0,40),1);
+});
+},()=>{}));
+
+/* สมาชิกใหม่ */
+listen(C("accounts"),0,x=>{
+say("👤 สมาชิกใหม่: "+x.id,1);buzz();
+},s=>{accts=L(s);});
+
+if(MAIN){
+/* คำสั่งเช่า / ต่อเช่า */
+listen(C("rentals"),0,x=>{
+if(x.status=="pending"){say("🧾 มีคำสั่ง"+(x.type=="renew"?"ต่อเช่า":"เช่า")+"ใหม่จาก "+x.u,1);buzz()}
+},s=>{rentals=L(s).sort((a,b)=>b.at-a.at);soft()});
+}else{
+/* แจ้งโอนใหม่ */
+listen(C("topups"),0,x=>{
+if(x.status=="pending"&&x.method!="gift"){say("💰 มีแจ้งโอนใหม่จาก "+x.u+" "+x.amount+" บาท",1);buzz()}
+},s=>{tops=L(s).sort((a,b)=>b.at-a.at);soft()});
+/* ข้อความจากเว็บหลัก */
+listen(C("inbox"),0,x=>{
+if(x.read)return;
+buzz();
+window.__ibxL=[x.id];
+if(!$("#mo").innerHTML)modal(`<h3 style="margin:0 0 6px">ข้อความจากผู้ดูแลเว็บหลัก</h3><div class="msg">${esc(x.t)}<div class="mu">${fd(x.at)}</div></div><button class="b f" onclick="ibxRead()">รับทราบ</button>`);
+else say("📩 มีข้อความใหม่จากผู้ดูแลเว็บหลัก",1);
+},()=>{});
+}
+}else{
+/* ลูกค้า: แอดมินตอบแชท */
+listen(C("chat").where("u","==",me.u),0,x=>{
+if(x.from!="admin"||$("#cp"))return;
+unread=true;dot();buzz();
+say("💬 "+(x.auto?"ร้านตอบกลับ":"ข้อความใหม่จากร้าน")+": "+(x.t||"[รูป]").slice(0,40),1);
+},()=>{});
+}
+}
+
+const _r=render;
+render=function(){_r();sub();dot()};
+sub();
+})();
+</script>
+
+
+  
   
 </body></html>
