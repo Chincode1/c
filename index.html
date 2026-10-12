@@ -1382,6 +1382,243 @@ closeM();tab="mine";await load();render();say("จ่ายด้วยเคร
 })();
 </script>
 
+  <!-- ===== ADDON 12: เมนูมุมมองลูกค้าให้แอดมิน / โปรไฟล์แอดมิน / แชทแบบ IG ===== -->
+<style>
+.ca{border-radius:50%;object-fit:cover;background:var(--bd);display:flex;align-items:center;justify-content:center;font-weight:600;flex:none}
+#cm{gap:6px}
+.mr{display:flex;align-items:flex-end;gap:6px;cursor:pointer}.mr.me{flex-direction:row-reverse}
+.bb{max-width:72%;background:var(--bd);border-radius:20px;padding:8px 14px;word-break:break-word}
+.bb.me{background:linear-gradient(135deg,var(--ac),color-mix(in srgb,var(--ac) 60%,#8b5cf6));color:var(--ac2)}
+.bb img{max-width:100%;border-radius:12px;display:block;margin-bottom:4px}
+.bb small{display:block;opacity:.6;font-size:10px;text-align:right}
+.rq{font-size:12px;opacity:.75;border-left:3px solid currentColor;padding:2px 8px;margin-bottom:5px}
+#crp{padding:8px 14px;border-top:1px solid var(--bd);font-size:13px;justify-content:space-between;align-items:center;gap:8px}
+</style>
+<script>
+(()=>{
+const ov=on=>{if(on){if(!$("#ld")){const d=document.createElement("div");d.id="ld";d.innerHTML='<div class="spn"></div>';document.body.appendChild(d)}}else $("#ld")?.remove()};
+
+/* โหลดโปรไฟล์แอดมิน */
+const _l=load;
+load=async function(){
+await _l();
+if(isAdm()){try{const a=await D("admins/admin").get();if(a.exists){me.dn=a.data().dn;me.av=a.data().av}}catch(e){}}
+};
+
+/* เมนู: แอดมินเห็นเมนูแบบลูกค้า (หน้าหลัก ฯลฯ) */
+const _N=NAV;
+NAV=function(){
+let G=_N();
+if(!isAdm())return G;
+G=G.filter(x=>x[0]!="หน้าร้าน");
+const L=MAIN?[["plans","หน้าหลัก (แพ็กเกจเช่า)","shop"],["mine","การเช่า (มุมมองลูกค้า)","doc"]]:[["shop","หน้าหลัก / สินค้า","shop"],["top","เติมเงิน (มุมมองลูกค้า)","bolt"],["his","ประวัติสั่งซื้อ","doc"],["info","ข้อมูลร้าน / ติดต่อ","info"]];
+const i=G.findIndex(x=>x[0]=="บัญชี");
+G.splice(i<0?G.length:i,0,["มุมมองลูกค้า",L.map(x=>[...x,""]),"shop"]);
+return G;
+};
+
+/* โปรไฟล์แอดมิน */
+window.saveAdmProfile=async()=>{
+ov(1);try{
+const u={dn:$("#ap_n").value.trim()},f=$("#ap_f").files[0];
+if(f)u.av=await pic(f,200,$("#ap_r").checked);
+await D("admins/admin").update(u);me={...me,...u};render();say("บันทึกโปรไฟล์แล้ว",1);
+}catch(e){say(ERR(e))}finally{ov(0)}};
+
+/* วาดหน้า: การ์ดโปรไฟล์แอดมิน + ปุ่มสลับหน้าลูกค้า/แอดมินที่แถบล่าง */
+const _r=render;
+render=function(){
+_r();
+if(!isAdm())return;
+if(tab=="acct"){
+const h=document.querySelector("#app .ph");
+if(h&&!$("#apc"))h.insertAdjacentHTML("afterend",`<div class="c" id="apc"><h3>โปรไฟล์ผู้ดูแล</h3>${me.av?`<img class="av" src="${esc(me.av)}">`:`<div class="av">${esc((me.dn||"A")[0].toUpperCase())}</div>`}<input id="ap_n" placeholder="ชื่อที่แสดง (เช่น แอดมิน)" value="${esc(me.dn||"")}"><label class="mu">รูปโปรไฟล์ (วงกลม)</label><input id="ap_f" type="file" accept="image/*"><label class="cl">ลบพื้นหลังรูปอัตโนมัติ<input type="checkbox" id="ap_r"></label><button class="b f" onclick="saveAdmProfile()">บันทึกโปรไฟล์</button></div>`);
+}
+const b=$("#bn");if(!b||b.querySelector(".hm"))return;
+const on=(MAIN?["plans","mine"]:["shop","top","his","info"]).includes(tab);
+const k=on?(MAIN?"a_shops":"a_dash"):(MAIN?"plans":"shop");
+const x=document.createElement("button");x.className="hm";x.onclick=()=>goT(k);
+x.innerHTML=ico(on?"chart":"shop")+`<span>${on?"แอดมิน":"หน้าลูกค้า"}</span>`;
+b.insertBefore(x,b.lastElementChild);
+};
+
+/* ===== แชทแบบ IG: โปรไฟล์กลม + ตอบข้อความ ===== */
+const AV={},tm=t=>new Date(t).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+let CU=null,UN=null,RE=null,RM={},TK=0,adm={},cus={};
+const getAv=async u=>{
+if(AV[u])return AV[u];
+try{const s=await D(u=="admin"?"admins/admin":"accounts/"+u).get(),d=s.exists?s.data():{};
+return AV[u]={u,av:d.av||(u=="admin"?site.logo||"":""),dn:d.dn||""}}
+catch(e){return AV[u]={u,av:"",dn:""}}
+};
+const avh=(o,s)=>o&&o.av?`<img class="ca" style="width:${s}px;height:${s}px" src="${esc(o.av)}">`:`<div class="ca" style="width:${s}px;height:${s}px;font-size:${Math.round(s*.42)}px">${esc(((o&&(o.dn||o.u))||"?")[0].toUpperCase())}</div>`;
+function shell(title,peer,back,inp){
+UN&&UN();UN=null;$("#cp")?.remove();TK++;
+const p=document.createElement("div");p.id="cp";
+p.innerHTML=`<div class="ch">${back?`<button class="ib" onclick="chatList()">←</button>`:""}<span style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">${peer?avh(peer,36):""}<b style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(title)}</b></span><button class="ib" onclick="chatClose()">${ico("close")}</button></div><div id="cm"></div>${inp?`<div id="crp" style="display:none"></div><div class="cr"><label class="ib" style="cursor:pointer">${ico("tag")}<input type="file" id="cf" accept="image/*" hidden></label><input id="ci" placeholder="พิมพ์ข้อความ" onkeydown="if(event.key=='Enter')chatSend()"><button class="b sm" onclick="chatSend()">ส่ง</button></div>`:""}`;
+document.body.appendChild(p);
+}
+window.chatClose=()=>{UN&&UN();UN=null;$("#cp")?.remove()};
+window.chatOpen=async u=>{
+CU=u;RE=null;for(const k in AV)delete AV[k];
+const [A,P]=await Promise.all([getAv(isAdm()?"admin":me.u),getAv(isAdm()?u:"admin")]);
+adm=isAdm()?A:P;cus=isAdm()?P:A;
+shell(P.dn||(isAdm()?u:nm()),P,isAdm(),1);
+const my=TK;
+UN=C("chat").where("u","==",u).onSnapshot(s=>{
+if(my!=TK)return;
+const m=$("#cm");if(!m)return;
+const L=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.at-b.at);
+RM=Object.fromEntries(L.map(x=>[x.id,x]));
+m.innerHTML=L.map((x,i)=>{
+const mine=(x.from=="admin")==isAdm(),who=x.from=="admin"?adm:cus,n=L[i+1],last=!n||n.from!=x.from;
+return `<div class="mr ${mine?"me":""}" onclick="chatRe('${x.id}')">${last?avh(who,28):'<span style="width:28px;flex:none"></span>'}<div class="bb ${mine?"me":""}">${x.re?`<div class="rq">${esc(x.re.n)}: ${esc(x.re.t)}</div>`:""}${x.img?`<img src="${esc(x.img)}">`:""}${x.t?`<div>${esc(x.t)}</div>`:""}<small>${tm(x.at)}</small></div></div>`;
+}).join("")||'<div class="mu" style="text-align:center">เริ่มคุยได้เลย</div>';
+m.scrollTop=m.scrollHeight;
+},()=>{});
+};
+window.chatRe=id=>{
+const x=RM[id];if(!x)return;
+const n=x.from=="admin"?(adm.dn||"แอดมิน"):(cus.dn||x.u);
+RE={n,t:(x.t||"[รูป]").slice(0,60)};
+const r=$("#crp");r.style.display="flex";
+r.innerHTML=`<span class="mu" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ตอบ ${esc(n)}: ${esc(RE.t)}</span><button class="ib" onclick="chatRe0()">✕</button>`;
+$("#ci").focus();
+};
+window.chatRe0=()=>{RE=null;const r=$("#crp");if(r)r.style.display="none"};
+window.chatList=()=>{
+shell("แชทลูกค้า",null,0,0);
+const my=TK;
+UN=C("chat").onSnapshot(async s=>{
+const m={};s.docs.forEach(d=>{const x=d.data();if(!m[x.u]||x.at>m[x.u].at)m[x.u]=x});
+const us=Object.values(m).sort((a,b)=>b.at-a.at),info=await Promise.all(us.map(x=>getAv(x.u)));
+const el=$("#cm");if(!el||my!=TK)return;
+el.innerHTML=us.map((x,i)=>`<button class="di" data-u="${esc(x.u)}" onclick="chatOpen(this.dataset.u)">${avh(info[i],44)}<span style="flex:1;min-width:0;text-align:left"><b>${esc(info[i].dn||x.u)}</b><div class="mu" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${x.from=="admin"?"คุณ: ":""}${esc((x.t||"[รูป]").slice(0,40))}</div></span><span class="mu">${tm(x.at)}</span></button>`).join("")||'<div class="mu" style="text-align:center">ยังไม่มีแชท</div>';
+},()=>{});
+};
+window.chatSend=async()=>{
+const t=$("#ci").value.trim(),f=$("#cf").files[0];if(!t&&!f)return;
+ov(1);try{
+const d={u:CU,from:isAdm()?"admin":"user",t,at:Date.now()};
+if(RE)d.re=RE;
+if(f)d.img=await pic(f,600);
+await C("chat").add(d);$("#ci").value="";$("#cf").value="";chatRe0();
+}catch(e){say(ERR(e))}finally{ov(0)}
+};
+})();
+</script>
+
+  <!-- ===== ADDON 13: แชทตอบอัตโนมัติ ===== -->
+<script>
+(()=>{
+/* เมนูตั้งค่า (แอดมิน) */
+const _N=NAV;
+NAV=function(){
+const G=_N();
+if(isAdm()){const g=G.find(x=>x[0]=="เมนูและปุ่ม");if(g&&!g[1].some(i=>i[0]=="a_auto"))g[1].push(["a_auto","แชทตอบอัตโนมัติ","chat",""])}
+return G;
+};
+const page=()=>`<div class="c"><h3>แชทตอบอัตโนมัติ</h3><div class="mu" style="margin-bottom:8px">ลูกค้าเปิดแชทจะเห็นข้อความทักทายก่อน พอลูกค้าส่งข้อความ ระบบจะตอบว่ารอแอดมินตรวจสอบ แล้วแอดมินค่อยมาตอบจริง</div><label class="cl">เปิดใช้งาน<input type="checkbox" ${site.autoOn===false?"":"checked"} onchange="cuSet('autoOn',this.checked)"></label><label class="mu">ข้อความทักทาย (โชว์ตอนลูกค้าเปิดแชท)</label><textarea placeholder="สวัสดีครับ มีอะไรให้ช่วยสอบถามไหมครับ" onchange="cuSet('autoGreet',this.value.trim())">${esc(site.autoGreet||"")}</textarea><label class="mu">ปุ่มคำถามด่วน (คั่นด้วยเครื่องหมายจุลภาค เช่น สอบถามสินค้า,แจ้งปัญหาเติมเงิน)</label><input value="${esc(site.autoQ||"")}" onchange="cuSet('autoQ',this.value.trim())"><label class="mu">ข้อความตอบอัตโนมัติ (หลังลูกค้าส่งข้อความ)</label><textarea placeholder="ได้รับข้อความแล้วครับ รอแอดมินตรวจสอบและตอบกลับสักครู่นะครับ" onchange="cuSet('autoWait',this.value.trim())">${esc(site.autoWait||"")}</textarea><label class="mu">ไม่ตอบซ้ำภายใน (นาที) 0 = ตอบทุกข้อความ</label><input type="number" min="0" value="${site.autoMin??30}" onchange="cuSet('autoMin',+this.value||0)"></div>`;
+const _r=render;
+render=function(){
+_r();
+if(tab=="a_auto"&&isAdm()){
+[...$("#app").children].forEach(e=>{if(e.tagName!="HEADER"&&!e.classList.contains("nb")&&e.id!="nbv")e.remove()});
+$("#app").insertAdjacentHTML("beforeend",`<h3 class="ph">แชทตอบอัตโนมัติ</h3>`+page());
+}
+};
+
+/* ข้อความทักทาย + ปุ่มคำถามด่วน (ฝั่งลูกค้า) */
+const _co=window.chatOpen;
+window.chatOpen=async function(u){
+await _co(u);
+if(isAdm()||site.autoOn===false||!$("#cm")||$("#cg"))return;
+let ad={};try{const s=await D("admins/admin").get();ad=s.exists?s.data():{}}catch(e){}
+const av=ad.av||site.logo||"",ini=esc(((ad.dn||nm())[0]||"A").toUpperCase());
+const g=site.autoGreet||"สวัสดีครับ มีอะไรให้ช่วยสอบถามไหมครับ";
+const qs=(site.autoQ||"").split(",").map(s=>s.trim()).filter(Boolean).slice(0,6);
+$("#cm").insertAdjacentHTML("beforebegin",`<div id="cg" style="padding:10px 12px 4px;border-bottom:1px solid var(--bd)"><div style="display:flex;gap:6px;align-items:flex-end">${av?`<img class="ca" style="width:28px;height:28px" src="${esc(av)}">`:`<div class="ca" style="width:28px;height:28px;font-size:12px">${ini}</div>`}<div class="bb" style="white-space:pre-wrap">${esc(g)}</div></div>${qs.length?`<div class="ac" style="margin:8px 0 4px 34px">${qs.map(q=>`<button class="b s sm" data-q="${esc(q)}" onclick="autoQ(this.dataset.q)">${esc(q)}</button>`).join("")}</div>`:""}</div>`);
+};
+window.autoQ=q=>{const i=$("#ci");if(!i)return;i.value=q;chatSend()};
+
+/* ตอบอัตโนมัติหลังลูกค้าส่งข้อความ */
+const _cs=window.chatSend;
+window.chatSend=async function(){
+const had=!!($("#ci")?.value.trim()||$("#cf")?.files[0]);
+await _cs();
+if(!had||isAdm()||!me||site.autoOn===false||!$("#ci")||$("#ci").value!=="")return;
+try{
+const w=(site.autoWait||"").trim()||"ได้รับข้อความแล้วครับ รอแอดมินตรวจสอบและตอบกลับสักครู่นะครับ";
+const cd=(site.autoMin>=0&&site.autoMin!==""&&site.autoMin!=null?+site.autoMin:30)*60000;
+const s=await C("chat").where("u","==",me.u).get();
+const last=Math.max(0,...s.docs.map(d=>d.data()).filter(x=>x.from=="admin").map(x=>x.at||0));
+if(Date.now()-last<cd)return;
+await new Promise(r=>setTimeout(r,900));
+await C("chat").add({u:me.u,from:"admin",auto:true,t:w,at:Date.now()});
+}catch(e){}
+};
+})();
+</script>
+
+<!-- ===== ADDON 14: แยกเมนูลูกค้า / เมนูแอดมิน ===== -->
+<style>
+.mvt{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--bd)}
+.mvt button{flex:1}
+.dw .mvt .b{color:var(--ac2)!important}
+.dw .mvt .b.s{color:var(--mntx,var(--tx))!important}
+</style>
+<script>
+(()=>{
+let mv=null;
+const CT=()=>MAIN?["plans","mine"]:["shop","top","his","info"];
+const CL=()=>MAIN
+?[["plans","หน้าแรก (แพ็กเกจเช่า)","shop"],["mine","การเช่าของฉัน","doc"],["acct","บัญชี / โปรไฟล์","user"]]
+:[["shop","หน้าแรก / สินค้า","shop"],["top","เติมเงิน","bolt"],["his","ประวัติสั่งซื้อ","doc"],["info","ข้อมูลร้าน / ติดต่อ","info"],["acct","บัญชี / โปรไฟล์","user"]];
+window.mvSet=v=>{mv=v;menuOpen()};
+function inject(){
+const dw=document.querySelector("#mo .dw");
+if(!dw){mv=null;return}
+if(!isAdm()||dw.querySelector(".mvt"))return;
+const c=(mv||(CT().includes(tab)?"c":"a"))=="c";
+const tg=document.createElement("div");
+tg.className="mvt";
+tg.innerHTML=`<button class="b sm ${c?"":"s"}" onclick="mvSet('c')">เมนูลูกค้า</button><button class="b sm ${c?"s":""}" onclick="mvSet('a')">เมนูแอดมิน</button>`;
+(dw.querySelector(".dme")||dw.querySelector(".dh")).after(tg);
+const dsc=dw.querySelector(".dsc");
+if(c){
+dsc.innerHTML=`<h4>เมนูลูกค้า (เหมือนที่ลูกค้าเห็น)</h4>`+CL().map(([k,l,i])=>`<button class="di ${tab==k?"on":""}" onclick="goT('${k}')"><span class="dic">${ico(i)}</span><span>${l}</span></button>`).join("");
+}else{
+dsc.querySelectorAll("details").forEach(d=>{if((d.querySelector("summary")?.textContent||"").includes("มุมมองลูกค้า"))d.remove()});
+}
+}
+new MutationObserver(inject).observe(document.getElementById("mo"),{childList:true,subtree:true});
+})();
+</script>
+
+<!-- ===== ADDON 15: แอดมินตั้งรหัสใหม่ให้ร้านที่เช่า ===== -->
+<script>
+(()=>{
+if(!MAIN)return;
+const cred=r=>r.status=="done"?`<div class="mu" style="user-select:all;word-break:break-all">ร้าน: ${esc(r.sname||r.shop)}\nลิงก์: ${esc(shopLink(r.shop))}</div><div class="mu" style="user-select:all">ชื่อผู้ใช้: <b>${esc(r.su||"admin")}</b> · รหัสผ่าน: <b>${esc(r.spw||"-")}</b></div>${(r.pwh||[]).length>1?`<details class="mu"><summary>ประวัติรหัสผ่าน</summary>${r.pwh.slice().reverse().map(x=>`<div>${esc(x.p)} · ${fd(x.at)}</div>`).join("")}</details>`:""}`:"";
+const btn=r=>r.status=="done"&&r.shop?`<button class="b s sm" data-r="${r.id}" data-s="${esc(r.shop)}" onclick="resetShopPw(this.dataset.r,this.dataset.s)">ตั้งรหัสใหม่</button>`:"";
+rentUI=function(){
+return `<div class="c"><h3>คำสั่งเช่า</h3>${rentals.slice(0,60).map(r=>`<div class="rw"><div style="min-width:0"><b>${esc(r.u)}</b> · ${TN[r.tier]} ${r.days} วัน · ${r.price} บาท<div class="mu">${fd(r.at)}</div>${cred(r)}</div><span class="ac">${r.img?`<button class="b s sm" onclick="showImg('${r.id}')">สลิป</button>`:""}${btn(r)}${r.status=="pending"?`<button class="b sm" onclick="decideRent('${r.id}',1)">อนุมัติ</button><button class="b d sm" onclick="decideRent('${r.id}',0)">ปฏิเสธ</button>`:stChip(r.status)}</span></div>`).join("")||'<span class="mu">ไม่มี</span>'}</div>`;
+};
+window.resetShopPw=(rid,shop)=>modal(`<h3 style="margin:0 0 6px">ตั้งรหัสใหม่ให้ร้าน ${esc(shop)}</h3><div class="mu">รหัสผ่านแอดมินของร้าน (ชื่อผู้ใช้ admin) อย่างน้อย 6 ตัว</div><input id="rpw" placeholder="รหัสผ่านใหม่"><button class="b f" data-r="${rid}" data-s="${esc(shop)}" onclick="doResetPw(this.dataset.r,this.dataset.s)">บันทึกรหัสใหม่</button>`);
+window.doResetPw=async(rid,shop)=>{
+const pw=$("#rpw").value;
+if(!isAdm())return say("เฉพาะผู้ดูแล");
+if(pw.length<6)return say("รหัสผ่านอย่างน้อย 6 ตัว");
+if(busy)return;busy=true;
+try{
+const salt=rs();
+await R.doc("shops/"+shop+"/admins/admin").set({hash:await sha(pw,salt),salt},{merge:true});
+await D("rentals/"+rid).update({su:"admin",spw:pw,pwh:firebase.firestore.FieldValue.arrayUnion({p:pw,at:Date.now()})});
+closeM();await load();render();say("ตั้งรหัสใหม่แล้ว",1);
+}catch(e){say(ERR(e))}finally{busy=false}
+};
+})();
+</script>
 
 
 
