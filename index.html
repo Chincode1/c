@@ -1745,12 +1745,12 @@ return `<div class="rw"><div style="min-width:0"><b>${rn?"ต่อเช่า 
 window.rnOpen=rid=>{
 const r=rentals.find(x=>x.id==rid);if(!r)return;
 const m=SM[r.shop]||{};RN={rid,shop:r.shop,tier:r.tier};
-let L=plans.filter(p=>p.tier==r.tier);if(!L.length)L=plans.slice();
-L.sort((a,b)=>(!!b.promo-!!a.promo)||mp(a)-mp(b));
-modal(`<h3 style="margin:0">ต่อเช่าร้าน ${esc(m.name||r.shop)}</h3><div class="mu" style="margin-bottom:6px">${m.exp?(m.exp<Date.now()?"ร้านหมดอายุแล้ว":rem(m.exp-Date.now())):""} · เลือกแพ็กเกจที่จะต่อ (เวลาจะนับต่อจากเดิม)</div>${L.map(p=>`<div class="rw"><div><b>${lbp(p)}</b>${p.promo?' <span class="chip ok">โปรโมชั่น</span>':""}</div><span class="r" style="gap:10px"><span class="pr">${priceP(p)}</span><button class="b sm" onclick="rnPick('${p.id}')">เลือก</button></span></div>`).join("")||'<div class="mu">ยังไม่มีแพ็กเกจ</div>'}`);
+const tiers=[r.tier,...Object.keys(TN).filter(k=>k!=r.tier)];
+const body=tiers.map(k=>{const L=plans.filter(p=>p.tier==k).sort((a,b)=>(!!b.promo-!!a.promo)||mp(a)-mp(b));return L.length?`<div class="mu" style="margin:12px 0 2px"><b>${TN[k]}</b>${k==r.tier?" (ระดับปัจจุบัน)":""}</div>`+L.map(p=>`<div class="rw"><div><b>${lbp(p)}</b>${p.promo?' <span class="chip ok">โปรโมชั่น</span>':""}</div><span class="r" style="gap:10px"><span class="pr">${priceP(p)}</span><button class="b sm" onclick="rnPick('${p.id}')">เลือก</button></span></div>`).join(""):""}).join("")||'<div class="mu">ยังไม่มีแพ็กเกจ</div>';
+modal(`<h3 style="margin:0">ต่อเช่าร้าน ${esc(m.name||r.shop)}</h3><div class="mu" style="margin-bottom:6px">${m.exp?(m.exp<Date.now()?"ร้านหมดอายุแล้ว":rem(m.exp-Date.now())):""} · เลือกแพ็กเกจที่จะต่อ เปลี่ยนระดับได้ (เวลานับต่อจากเดิม)</div>${body}`);
 };
 window.rnPick=pid=>{
-const p=plans.find(x=>x.id==pid);if(!p)return;RN.pid=pid;
+const p=plans.find(x=>x.id==pid);if(!p)return;RN.pid=pid;RN.tier=p.tier;
 modal(`<h3 style="margin:0">ต่อเช่า ${lbp(p)}</h3><div style="font-size:26px;font-weight:600;margin:6px 0">${priceP(p)}</div><button class="b f" onclick="rnCredit()">จ่ายด้วยเครดิต (มี ${wal.credits||0} บาท)</button><div class="mu" style="margin:14px 0 6px">หรือโอนแล้วแนบสลิป</div>${site.qr?`<img src="${esc(site.qr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:8px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.pay||"")}</div>${site.twPay||site.twQr?`<div class="mu" style="margin-top:8px">TrueMoney</div>${site.twQr?`<img src="${esc(site.twQr)}" style="max-width:200px;border-radius:10px;display:block;margin-bottom:8px">`:""}<div class="mu" style="white-space:pre-wrap">${esc(site.twPay||"")}</div>`:""}<input id="rns" type="file" accept="image/*"><button class="b s f" id="rnb" onclick="rnSlip()">ส่งสลิปต่อเช่า</button>`);
 };
 window.rnCredit=async()=>{
@@ -1766,7 +1766,7 @@ if(!ms.exists)throw Error("ไม่พบร้านนี้");
 const d=s.exists?s.data():{credits:0,orders:[]};
 if((d.credits||0)<p.price)throw Error("เครดิตไม่พอ");
 t.set(wr,{...d,credits:d.credits-p.price,orders:[...(d.orders||[]),{name:"ต่อเช่า "+TN[p.tier]+" "+lbp(p),price:p.price,at:Date.now()}]});
-t.update(mr,{exp:Math.max(Date.now(),ms.data().exp||0)+mp(p)*60000});
+t.update(mr,{exp:Math.max(Date.now(),ms.data().exp||0)+mp(p)*60000,tier:p.tier});
 t.set(D("rentals/"+rs()),{u:me.u,tier:RN.tier,days:mp(p)/1440,price:p.price,at:Date.now(),status:"done",type:"renew",method:"credit",shop:RN.shop});
 });
 closeM();tab="mine";await load();render();say("ต่อเช่าสำเร็จ",1);
@@ -1796,7 +1796,7 @@ const cur=(await D("rentals/"+id).get()).data();
 if(!cur||cur.status!="pending")throw Error("ดำเนินการแล้ว");
 const mr=R.doc("shops_meta/"+r.shop),m=(await mr.get()).data();
 if(!m)throw Error("ไม่พบร้านนี้ (อาจถูกลบแล้ว)");
-await mr.update({exp:Math.max(Date.now(),m.exp||0)+Math.round(r.days*864e5)});
+await mr.update({exp:Math.max(Date.now(),m.exp||0)+Math.round(r.days*864e5),tier:r.tier});
 await D("rentals/"+id).update({status:"done"});
 await load();render();say("อนุมัติต่อเช่าแล้ว",1);
 }catch(e){say(ERR(e))}finally{busy=false;ov(0)}
@@ -1925,9 +1925,18 @@ try{const b=R.batch();(window.__ibxL||[]).forEach(id=>b.update(C("inbox").doc(id
 closeM();
 };
 const _r=render;
-let EXP=0;
-const sync=async()=>{try{const d=await R.doc("shops_meta/"+SHOP).get(),n=d.exists?(d.data().exp||0):0;if(n!==EXP){EXP=n;if(isAdm())render()}}catch(e){}};
-sync();setInterval(sync,60000);
+let EXP=0,OFF=false;
+const lock=()=>{
+if($("#xlock"))return;
+closeM();$("#cp")?.remove();
+const d=document.createElement("div");d.id="xlock";
+d.style.cssText="position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center";
+d.innerHTML=`<div class="c" style="max-width:380px;width:100%"><h3 class="er">${OFF?"ร้านถูกระงับ":"ร้านหมดอายุแล้ว"}</h3><div class="mu" style="margin-bottom:10px">${OFF?"กรุณาติดต่อผู้ดูแลเว็บหลัก":"ต้องต่อเช่าก่อน ถึงจะใช้งานและปรับแต่งร้านได้"}</div>${OFF?"":`<a class="b f" style="display:block;text-decoration:none" href="${esc(main+"?renew="+SHOP)}">เลือกแพ็กเกจต่อเช่า</a>`}<button class="b s f" onclick="location.reload()">ต่อเช่าแล้ว รีเฟรช</button></div>`;
+document.body.appendChild(d);
+};
+const chk=()=>{if(OFF||(EXP&&EXP<=Date.now()))lock();else $("#xlock")?.remove()};
+const sync=async()=>{try{const d=await R.doc("shops_meta/"+SHOP).get(),x=d.exists?d.data():{},n=x.exp||0;OFF=!!x.off||!d.exists;const ch=n!==EXP;EXP=n;chk();if(ch&&isAdm())render()}catch(e){}};
+sync();setInterval(sync,60000);setInterval(chk,1000);
 render=function(){
 _r();
 if(!isAdm())return;
